@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Useless Projects 3.0 — Inauguration System | SNMIMT TinkerHub</title>
+  <link rel="stylesheet" href="assets/styles-Cc3jfXhB.css">
+  <link rel="stylesheet" href="_external/fonts.googleapis.com/css2.family_Fredoka_wght_500_600_700_family_Patrick_Hand_display_swap.css">
+  <style>
+    body {
+      background-color: var(--background, #FAF9F6);
+      color: var(--foreground, #1B1B1B);
+      font-family: 'Fredoka', -apple-system, sans-serif;
+    }
+    .font-hand {
+      font-family: 'Patrick Hand', cursive;
+    }
+    .font-display {
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 700;
+    }
+    .panel {
+      background: var(--card, #FFFFFF);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 16px;
+      box-shadow: 4px 6px 0 0 var(--foreground, #1B1B1B);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 4px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--secondary, #F4F2EB);
+    }
+    .btn-ink {
+      background: var(--foreground, #1B1B1B);
+      color: var(--background, #FAF9F6);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 10px 24px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 2px 4px 0 0 rgba(0,0,0,0.3);
+      transition: all 0.15s ease;
+    }
+    .btn-ink:hover {
+      transform: translateY(-2px);
+      box-shadow: 2px 6px 0 0 rgba(0,0,0,0.4);
+    }
+    .btn-ink:active {
+      transform: translateY(1px);
+    }
+    .root-path {
+      transition: opacity 420ms ease, transform 820ms cubic-bezier(.16,.9,.28,1);
+      transform-origin: 500px 500px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+  <!-- Top Header Banner -->
+  <header class="border-b-2 border-foreground bg-foreground px-6 py-3 flex items-center justify-between shadow-sm">
+    <div class="w-24"></div>
+    <img src="__l5e/assets-v1/634a551f-8685-4759-b46e-fdbe6a390438/tinkerhub-snmimt-banner.png" alt="TinkerHub SNMIMT" class="h-14 sm:h-18 w-auto object-contain">
+    <div class="w-24 flex justify-end">
+      <a href="admin.html" target="_blank" class="pill bg-card/20 text-card text-xs hover:bg-card/40 transition-colors border-card font-hand">
+        ⚙ Admin Panel
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Display Stage -->
+  <main class="mx-auto grid max-w-[1400px] w-full gap-8 px-6 py-6 lg:grid-cols-[380px_1fr] items-center flex-1">
+    
+    <!-- Left Column: Scan QR Code & Live Registration Info -->
+    <section class="space-y-5">
+      <div class="panel p-6 text-center space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="pill bg-tetris-yellow text-foreground text-xs">📲 Maker Check-in</span>
+          <span id="live-indicator" class="pill text-xs bg-green-100 text-green-800">● Live Sync</span>
+        </div>
+
+        <h2 class="font-display text-2xl leading-tight">Scan to Charge the Roots</h2>
+        <p class="font-hand text-muted-foreground text-sm">Scan with your phone to register your ticket & light the inauguration console</p>
+
+        <!-- Dynamic High-Resolution QR Code -->
+        <div class="flex justify-center my-2">
+          <div class="p-3 bg-[#FAF9F6] border-2 border-foreground rounded-2xl shadow-sm inline-block">
+            <img id="qr-img" src="" alt="Scan QR Code to Register" class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg">
+          </div>
+          <div class="mt-1 text-center">
+            <a id="qr-url-text" href="/scan.html" target="_blank" class="font-mono text-xs text-muted-foreground hover:text-foreground underline break-all">/scan.html</a>
+        </div>
+
+        <!-- Progress Counter -->
+        <div class="space-y-2 pt-2">
+          <div class="flex items-center justify-between font-display">
+            <span class="text-sm uppercase tracking-wider text-muted-foreground">Makers In</span>
+            <span class="text-3xl"><span id="count-num">0</span><span id="target-num" class="text-muted-foreground text-xl"> / 32</span></span>
+          </div>
+          <div class="h-4 w-full overflow-hidden rounded-full border-2 border-foreground bg-secondary">
+            <div id="progress-bar" class="h-full bg-reishi transition-[width] duration-500 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Recent Scanner Ticker -->
+        <div class="pt-2 border-t border-border/60 text-left">
+          <p class="font-display text-xs text-muted-foreground uppercase tracking-wider mb-2">Latest Check-ins</p>
+          <div id="recent-ticker" class="space-y-1.5 max-h-28 overflow-y-auto font-hand text-sm">
+            <p class="text-muted-foreground text-xs italic">Waiting for first scan...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: 24 Reishi Roots & Big Red Button Stage -->
+    <section class="panel relative flex min-h-[72vh] flex-col items-center justify-center overflow-hidden p-6">
+      <!-- Status Top Badges -->
+      <div class="absolute left-6 top-6 flex gap-2">
+        <span id="roots-badge" class="pill font-display">reishi: 0/24 roots</span>
+      </div>
+      <div class="absolute right-6 top-6 flex gap-2">
+        <span class="h-6 w-6 animate-float-soft rounded-full border-4 border-tetris-magenta bg-tetris-cyan"></span>
+        <span class="h-6 w-6 animate-float-soft rounded-full border-4 border-tetris-red bg-tetris-yellow"></span>
+      </div>
+
+      <!-- Center Reishi Roots SVG & Button -->
+      <div class="relative grid aspect-square w-full max-w-[620px] place-items-center">
+        <!-- Reishi SVG Canvas -->
+        <div class="absolute inset-0 pointer-events-none">
+          <svg id="reishi-svg" viewBox="0 0 1000 1000" class="h-full w-full overflow-visible" aria-hidden="true">
+            <defs>
+              <filter id="reishi-halo" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="12" result="b"></feGaussianBlur>
+                <feMerge>
+                  <feMergeNode in="b"></feMergeNode>
+                  <feMergeNode in="SourceGraphic"></feMergeNode>
+                </feMerge>
+              </filter>
+              <filter id="reishi-core-glow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="5" result="b"></feGaussianBlur>
+                <feMerge>
+                  <feMergeNode in="b"></feMergeNode>
+                  <feMergeNode in="SourceGraphic"></feMergeNode>
+                </feMerge>
+              </filter>
+              <radialGradient id="reishi-belt" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="var(--color-reishi)"></stop>
+                <stop offset="45%" stop-color="var(--color-reishi)"></stop>
+                <stop offset="100%" stop-color="var(--color-reishi-deep)"></stop>
+              </radialGradient>
+              <radialGradient id="reishi-core" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"></stop>
+                <stop offset="60%" stop-color="var(--color-reishi)" stop-opacity="0.35"></stop>
+                <stop offset="100%" stop-color="var(--color-reishi-deep)" stop-opacity="0"></stop>
+              </radialGradient>
+            </defs>
+
+            <!-- Background Pulsing Core Circles -->
+            <circle id="reishi-core-circle" cx="500" cy="500" r="280" fill="url(#reishi-core)" style="opacity: 0.12; transition: opacity 700ms ease;"></circle>
+            <circle id="reishi-halo-circle" cx="500" cy="500" r="182" fill="none" stroke="var(--color-reishi)" stroke-width="5" filter="url(#reishi-halo)" style="opacity: 0.18; transition: opacity 500ms ease, stroke-width 400ms ease;"></circle>
+            <circle id="reishi-flow-circle" cx="500" cy="500" r="182" fill="none" stroke="#ffffff" stroke-width="1.4" stroke-dasharray="14 22" style="opacity: 0.15; animation: reishi-flow 3.4s linear infinite;"></circle>
+
+            <!-- Root SVG Groups Container -->
+            <g id="roots-container"></g>
+          </svg>
+        </div>
+
+        <!-- Big Red Inauguration Button -->
+        <div class="relative z-10 flex flex-col items-center">
+          <div class="relative">
+            <!-- Shockwave ripple when armed -->
+            <span id="btn-shockwave" class="hidden absolute inset-0 rounded-full bg-btn-red/25" style="animation: shockwave 2.4s ease-out infinite"></span>
+            
+            <div class="relative grid h-56 w-56 place-items-center rounded-full border-4 border-foreground bg-secondary shadow-[8px_10px_0_0_var(--color-foreground)]">
+              <button id="inauguration-btn" type="button" disabled aria-label="Inauguration button" class="group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25" style="box-shadow: 0 8px 0 0 color-mix(in oklab, var(--color-btn-red-dark) 35%, transparent);">
+                <span id="btn-label" class="font-display text-center text-lg leading-tight tracking-widest text-foreground/40">PRESS</span>
+              </button>
+            </div>
+          </div>
+
+          <p id="btn-status-caption" class="absolute -bottom-16 left-1/2 w-max max-w-[80vw] -translate-x-1/2 rounded-full border-2 border-foreground bg-card/95 px-5 py-1.5 text-center font-hand text-base text-muted-foreground shadow-sm">
+            button stays cold until every root drinks reishi
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Celebration Modal (GPU Canvas Particles - Zero Lag) -->
+  <div id="celebration-modal" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center overflow-hidden bg-background/95 backdrop-blur-md px-6 text-center animate-stamp-in">
+    <canvas id="confetti-canvas" class="pointer-events-none absolute inset-0 h-full w-full"></canvas>
+    
+    <div class="relative z-10 flex max-w-2xl flex-col items-center">
+      <img src="__l5e/assets-v1/b3f5291b-4d5e-4635-a21e-c1beb140f910/useless-projects-3.png" alt="Useless Projects 3.0" class="w-[min(480px,85vw)] drop-shadow-[0_12px_0_rgba(0,0,0,0.12)]">
+      
+      <h1 class="mt-8 font-display text-4xl sm:text-6xl text-foreground tracking-tight">WELCOME TO USELESS PROJECTS 3.0!</h1>
+      <p class="mt-4 font-display text-2xl sm:text-3xl text-tetris-orange uppercase tracking-wider">LET'S START THE CHAOS!</p>
+      
+      <div class="mt-6 space-y-2 font-hand text-xl text-muted-foreground">
+        <p><span id="modal-maker-count" class="font-bold text-foreground font-display text-2xl">32</span> makers scanned in. Pointless building activated.</p>
+        <p class="text-base">SNMIMT TinkerHub × Useless Projects 3.0</p>
+      </div>
+
+      <button id="modal-close-btn" type="button" class="btn-ink mt-8 px-8 py-3 text-lg cursor-pointer hover:scale-105 active:scale-95 transition-transform">
+        Back to Console
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="px-6 py-4 text-center font-hand text-sm text-muted-foreground border-t border-border/40">
+    built with <span class="text-btn-red">♥</span> for the snmimt tinkerhub campus community
+  </footer>
+
+  <script>
+    // Procedural Reishi Roots Generator (24 Roots)
+    const TOTAL_ROOTS = 24;
+    const ROOT_CX = 500;
+    const ROOT_RADIUS = 196;
+    const ROOT_MAX_LEN = 900;
+
+    function pseudoRandom(seed) {
+      let s = seed;
+      return () => {
+        s = (s * 1664525 + 1013904223) % 4294967296;
+        return s / 4294967296;
+      };
+    }
+
+    function makeRibbonPath(points, startW, endW) {
+      let left = [], right = [];
+      for (let i = 0; i < points.length; i++) {
+        let p = points[i];
+        let prev = points[Math.max(0, i - 1)];
+        let next = points[Math.min(points.length - 1, i + 1)];
+        let dx = next[0] - prev[0];
+        let dy = next[1] - prev[1];
+        let len = Math.hypot(dx, dy) || 1;
+        let nx = -dy / len;
+        let ny = dx / len;
+        let t = i / (points.length - 1);
+        let halfW = (startW + (endW - startW) * t) / 2;
+        left.push(`${(p[0] + nx * halfW).toFixed(1)} ${(p[1] + ny * halfW).toFixed(1)}`);
+        right.unshift(`${(p[0] - nx * halfW).toFixed(1)} ${(p[1] - ny * halfW).toFixed(1)}`);
+      }
+      return `M ${left.join(" L ")} L ${right.join(" L ")} Z`;
+    }
+
+    function makeCorePath(points) {
+      return `M ${points.map(p => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" L ")}`;
+    }
+
+    function generateSpine(rand, origin, angle, length, segments, curl) {
+      let pts = [origin];
+      let x = origin[0], y = origin[1];
+      let curAngle = angle;
+      let segLen = length / segments;
+      for (let i = 0; i < segments; i++) {
+        curAngle += (rand() - 0.5) * curl;
+        curAngle = curAngle * 0.82 + angle * 0.18;
+        x += Math.cos(curAngle) * segLen;
+        y += Math.sin(curAngle) * segLen;
+        pts.push([x, y]);
+      }
+      return pts;
+    }
+
+    function generateRoots() {
+      let rand = pseudoRandom(20260910);
+      let roots = [];
+      for (let i = 0; i < TOTAL_ROOTS; i++) {
+        let baseAngle = (i / TOTAL_ROOTS) * Math.PI * 2 + (rand() - 0.5) * 0.12;
+        let origin = [ROOT_CX + Math.cos(baseAngle) * ROOT_RADIUS, ROOT_CX + Math.sin(baseAngle) * ROOT_RADIUS];
+        let len = ROOT_MAX_LEN * (0.55 + rand() * 0.45);
+        let w = 16 + rand() * 14;
+        let spine = generateSpine(rand, origin, baseAngle, len, 5 + Math.floor(rand() * 3), 0.9);
+        let branches = [{
+          ribbon: makeRibbonPath(spine, w, w * 0.18),
+          core: makeCorePath(spine),
+          coreWidth: w * 0.24
+        }];
+        let subBranches = 2 + Math.floor(rand() * 2);
+        for (let j = 0; j < subBranches; j++) {
+          let idx = 1 + Math.floor(rand() * (spine.length - 2));
+          let pt = spine[idx];
+          let prev = spine[idx - 1];
+          let bAngle = Math.atan2(pt[1] - prev[1], pt[0] - prev[0]) + (rand() > 0.5 ? 1 : -1) * (0.45 + rand() * 0.5);
+          let bW = w * (0.32 + rand() * 0.28);
+          let bSpine = generateSpine(rand, pt, bAngle, len * (0.3 + rand() * 0.35), 4, 1.1);
+          branches.push({
+            ribbon: makeRibbonPath(bSpine, bW, bW * 0.15),
+            core: makeCorePath(bSpine),
+            coreWidth: bW * 0.28
+          });
+        }
+        roots.push(branches);
+      }
+      return roots;
+    }
+
+    function getGoldenIndexOrder() {
+      let order = Array(TOTAL_ROOTS);
+      let step = Math.max(1, Math.round(TOTAL_ROOTS * 0.382));
+      let rank = 0, seen = new Set();
+      for (let i = 0; i < TOTAL_ROOTS * 4 && seen.size < TOTAL_ROOTS; i++) {
+        let pos = (i * step) % TOTAL_ROOTS;
+        if (!seen.has(pos)) {
+          seen.add(pos);
+          order[pos] = rank++;
+        }
+      }
+      for (let i = 0; i < TOTAL_ROOTS; i++) {
+        if (!seen.has(i)) order[i] = rank++;
+      }
+      return order;
+    }
+
+    // Build Reishi Roots SVG in DOM
+    const generatedRoots = generateRoots();
+    const goldenOrder = getGoldenIndexOrder();
+    const rootsContainer = document.getElementById('roots-container');
+
+    generatedRoots.forEach((branches, rootIdx) => {
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('id', `root-group-${rootIdx}`);
+      g.setAttribute('class', 'root-path');
+      g.style.opacity = '0';
+      g.style.transform = 'scale(0.35)';
+
+      branches.forEach((b, bIdx) => {
+        const bgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        bgPath.setAttribute('d', b.ribbon);
+        bgPath.setAttribute('fill', 'url(#reishi-belt)');
+        bgPath.setAttribute('filter', 'url(#reishi-halo)');
+        bgPath.setAttribute('opacity', '0.92');
+        g.appendChild(bgPath);
+
+        const corePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        corePath.setAttribute('d', b.core);
+        corePath.setAttribute('fill', 'none');
+        corePath.setAttribute('stroke', '#ffffff');
+        corePath.setAttribute('stroke-width', b.coreWidth);
+        corePath.setAttribute('stroke-linecap', 'round');
+        corePath.setAttribute('stroke-linejoin', 'round');
+        corePath.setAttribute('opacity', '0.85');
+        g.appendChild(corePath);
+
+        const flowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        flowPath.setAttribute('d', b.core);
+        flowPath.setAttribute('fill', 'none');
+        flowPath.setAttribute('stroke', '#ffffff');
+        flowPath.setAttribute('stroke-width', b.coreWidth * 0.7);
+        flowPath.setAttribute('stroke-linecap', 'round');
+        flowPath.setAttribute('stroke-dasharray', '10 90');
+        flowPath.style.animation = `reishi-flow ${1.5 + ((rootIdx + bIdx) % 5) * 0.3}s linear infinite`;
+        flowPath.style.opacity = '0.9';
+        g.appendChild(flowPath);
+      });
+
+      rootsContainer.appendChild(g);
+    });
+
+    // Set QR code dynamic link function
+    function updateQRCode(s) {
+      const base = s.publicUrl || window.location.origin;
+      const scanPortalUrl = `${base}/scan.html`;
+      document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(scanPortalUrl)}&bgcolor=FAF9F6&color=1B1B1B&margin=1`;
+      const linkEl = document.getElementById('qr-url-text');
+      if (linkEl) {
+        linkEl.textContent = scanPortalUrl;
+        linkEl.href = scanPortalUrl;
+      }
+    }
+
+    // State Management & Real-Time Sync
+    let state = {
+      target: 32,
+      paused: false,
+      fired: false,
+      attendees: []
+    };
+
+    function updateStateUI(s) {
+      if (s) updateQRCode(s);
+      state = s;
+      const count = s.attendees.length;
+      const target = s.target;
+      const rootsLit = Math.min(24, Math.round((count / Math.max(1, target)) * 24));
+      const isArmed = count >= target;
+      const fillRatio = target ? count / target : 0;
+
+      // Update counters & progress
+      document.getElementById('count-num').textContent = count;
+      document.getElementById('target-num').textContent = ` / ${target}`;
+      document.getElementById('progress-bar').style.width = `${Math.min(100, Math.round(fillRatio * 100))}%`;
+      document.getElementById('roots-badge').textContent = isArmed ? 'reishi: full' : `reishi: ${rootsLit}/24 roots`;
+
+      // Update SVG Glow
+      document.getElementById('reishi-core-circle').style.opacity = (0.12 + fillRatio * 0.8).toString();
+      const haloCircle = document.getElementById('reishi-halo-circle');
+      haloCircle.style.opacity = (0.18 + fillRatio * 0.82).toString();
+      haloCircle.setAttribute('stroke-width', isArmed ? '8' : '5');
+      document.getElementById('reishi-flow-circle').style.opacity = (0.15 + fillRatio * 0.7).toString();
+
+      // Update 24 Roots Lit
+      for (let i = 0; i < TOTAL_ROOTS; i++) {
+        const rootEl = document.getElementById(`root-group-${i}`);
+        const lit = (goldenOrder[i] ?? i) < rootsLit;
+        if (rootEl) {
+          rootEl.style.opacity = lit ? '1' : '0';
+          rootEl.style.transform = lit ? 'scale(1)' : 'scale(0.35)';
+        }
+      }
+
+      // Update Button State
+      const btn = document.getElementById('inauguration-btn');
+      const label = document.getElementById('btn-label');
+      const caption = document.getElementById('btn-status-caption');
+      const shockwave = document.getElementById('btn-shockwave');
+
+      if (s.fired) {
+        btn.disabled = true;
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red";
+        label.textContent = "LIVE";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-primary-foreground";
+        caption.textContent = "reishi released. useless projects 3.0 is live <3";
+        shockwave.classList.add('hidden');
+        showCelebrationModal(count);
+      } else if (s.paused) {
+        btn.disabled = true;
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";
+        label.textContent = "PAUSED";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-foreground/40";
+        caption.textContent = "system is paused by admin";
+        shockwave.classList.add('hidden');
+        hideCelebrationModal();
+      } else if (isArmed) {
+        btn.disabled = false;
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-pointer bg-btn-red animate-btn-breathe active:translate-y-2 active:shadow-[0_2px_0_0_var(--color-btn-red-dark)]";
+        btn.style.boxShadow = "0 10px 0 0 var(--color-btn-red-dark), inset 0 -8px 18px rgba(0,0,0,.25)";
+        label.textContent = "PRESS";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-primary-foreground";
+        caption.textContent = "all roots are lit — the button is hot. press it.";
+        shockwave.classList.remove('hidden');
+        hideCelebrationModal();
+      } else {
+        btn.disabled = true;
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";
+        btn.style.boxShadow = "0 8px 0 0 color-mix(in oklab, var(--color-btn-red-dark) 35%, transparent)";
+        label.textContent = "PRESS";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-foreground/40";
+        caption.textContent = `button stays cold until every root drinks reishi (${count}/${target})`;
+        shockwave.classList.add('hidden');
+        hideCelebrationModal();
+      }
+
+      // Update Ticker
+      const ticker = document.getElementById('recent-ticker');
+      if (s.attendees.length === 0) {
+        ticker.innerHTML = '<p class="text-muted-foreground text-xs italic">Waiting for first scan...</p>';
+      } else {
+        ticker.innerHTML = s.attendees.slice(0, 5).map(a => `
+          <div class="flex items-center justify-between py-1 border-b border-border/40 animate-ticker-in">
+            <span class="font-bold text-foreground">#${a.id} ${escapeHtml(a.name)}</span>
+            <span class="text-xs text-muted-foreground font-mono">${escapeHtml(a.ticket)}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Connect Real-Time SSE
+    function connectSSE() {
+      const ind = document.getElementById('live-indicator');
+      const evt = new EventSource('/api/events');
+
+      evt.onopen = () => {
+        ind.textContent = '● Live Sync';
+        ind.className = 'pill text-xs bg-green-100 text-green-800';
+      };
+
+      evt.addEventListener('init', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('scan', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('target', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('pause', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('fire', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('reset', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('delete', e => updateStateUI(JSON.parse(e.data).state));
+
+      evt.onerror = () => {
+        ind.textContent = '○ Reconnecting...';
+        ind.className = 'pill text-xs bg-yellow-100 text-yellow-800';
+        evt.close();
+        setTimeout(connectSSE, 2500);
+      };
+    }
+
+    // Inauguration Button Trigger
+    document.getElementById('inauguration-btn').addEventListener('click', async () => {
+      if (state.attendees.length >= state.target && !state.fired && !state.paused) {
+        await fetch('/api/fire', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fired: true })
+        });
+      }
+    });
+
+    // High Performance 60FPS Confetti Canvas Engine
+    let confettiAnimationId = null;
+    function startConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ["#FE7B02", "#FE3F21", "#F858BC", "#575ECF", "#06D6A0", "#FFD166", "#118AB2"];
+      const particles = [];
+      for (let i = 0; i < 110; i++) {
+        particles.push({
+          x: canvas.width * 0.5 + (Math.random() - 0.5) * 200,
+          y: canvas.height * 0.5 + (Math.random() - 0.5) * 100,
+          vx: (Math.random() - 0.5) * 20,
+          vy: -Math.random() * 18 - 6,
+          size: Math.random() * 9 + 5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rSpeed: (Math.random() - 0.5) * 12,
+          gravity: 0.35,
+          drag: 0.985
+        });
+      }
+
+      function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.vx *= p.drag;
+          p.vy += p.gravity;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rotation += p.rSpeed;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+
+          if (p.y > canvas.height + 20) {
+            p.y = -20;
+            p.x = Math.random() * canvas.width;
+            p.vy = Math.random() * 3 + 2;
+            p.vx = (Math.random() - 0.5) * 2;
+          }
+        }
+        confettiAnimationId = requestAnimationFrame(loop);
+      }
+      loop();
+    }
+
+    function stopConfetti() {
+      if (confettiAnimationId) {
+        cancelAnimationFrame(confettiAnimationId);
+        confettiAnimationId = null;
+      }
+    }
+
+    function showCelebrationModal(count) {
+      const modal = document.getElementById('celebration-modal');
+      document.getElementById('modal-maker-count').textContent = count;
+      modal.classList.remove('hidden');
+      if (!confettiAnimationId) startConfetti();
+    }
+
+    function hideCelebrationModal() {
+      const modal = document.getElementById('celebration-modal');
+      modal.classList.add('hidden');
+      stopConfetti();
+    }
+
+    document.getElementById('modal-close-btn').addEventListener('click', async () => {
+      hideCelebrationModal();
+      await fetch('/api/reset', { method: 'POST' });
+    });
+
+    // Keyboard trigger (SPACE or S)
+    window.addEventListener('keydown', async (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.code === 'Space' || e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        if (!state.paused && !state.fired && state.attendees.length < state.target) {
+          await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+        }
+      }
+    });
+
+    // Start
+    connectSSE();
+    fetch('/api/state').then(r => r.json()).then(updateStateUI);
+  </script>
+</body>
+</html>

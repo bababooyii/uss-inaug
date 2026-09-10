@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control Panel — Useless Projects 3.0 | SNMIMT TinkerHub</title>
+  <link rel="stylesheet" href="assets/styles-Cc3jfXhB.css">
+  <link rel="stylesheet" href="_external/fonts.googleapis.com/css2.family_Fredoka_wght_500_600_700_family_Patrick_Hand_display_swap.css">
+  <style>
+    body {
+      background-color: var(--background, #FAF9F6);
+      color: var(--foreground, #1B1B1B);
+      font-family: 'Fredoka', -apple-system, sans-serif;
+    }
+    .font-hand {
+      font-family: 'Patrick Hand', cursive;
+    }
+    .font-display {
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 700;
+    }
+    .panel {
+      background: var(--card, #FFFFFF);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 16px;
+      box-shadow: 4px 6px 0 0 var(--foreground, #1B1B1B);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 3px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--secondary, #F4F2EB);
+    }
+    .btn-ink {
+      background: var(--foreground, #1B1B1B);
+      color: var(--background, #FAF9F6);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 8px 18px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 2px 3px 0 0 rgba(0,0,0,0.3);
+      transition: all 0.15s ease;
+    }
+    .btn-ink:hover {
+      transform: translateY(-2px);
+      box-shadow: 2px 5px 0 0 rgba(0,0,0,0.4);
+    }
+    .btn-ink:active {
+      transform: translateY(1px);
+      box-shadow: 1px 1px 0 0 rgba(0,0,0,0.4);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--foreground, #1B1B1B);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 8px 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-outline:hover {
+      background: var(--secondary, #F4F2EB);
+    }
+    .btn-danger {
+      background: #E63946;
+      color: white;
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 8px 18px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 2px 3px 0 0 var(--foreground, #1B1B1B);
+    }
+    .btn-danger:hover {
+      background: #D90429;
+    }
+    .btn-warn {
+      background: #F4A261;
+      color: #1B1B1B;
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 8px 18px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-success {
+      background: #2A9D8F;
+      color: white;
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 8px 18px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-4 sm:p-6 lg:p-8">
+  <div class="mx-auto max-w-5xl space-y-6">
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b-2 border-foreground pb-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="pill bg-tetris-yellow">Admin Console</span>
+          <span id="sse-status" class="pill text-xs">● Connecting...</span>
+        </div>
+        <h1 class="mt-2 font-display text-3xl sm:text-4xl">Stage & Scan Controls</h1>
+        <p class="font-hand text-muted-foreground">Manage ceremony state, adjust thresholds, and control check-ins</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/" target="_blank" class="btn-outline flex items-center gap-1.5 text-sm">
+          🖥 Open Main Screen ↗
+        </a>
+        <a href="/scan.html" target="_blank" class="btn-outline flex items-center gap-1.5 text-sm">
+          📱 Mobile Scanner ↗
+        </a>
+      </div>
+    </header>
+
+    <!-- Metrics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="panel p-4">
+        <p class="font-hand text-sm text-muted-foreground">Makers In / Target</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="metric-count" class="font-display text-4xl">0</span>
+          <span id="metric-target" class="font-display text-xl text-muted-foreground">/ 32</span>
+        </div>
+        <div class="mt-3 h-2.5 w-full overflow-hidden rounded-full border border-foreground bg-secondary">
+          <div id="metric-bar" class="h-full bg-reishi transition-[width] duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="panel p-4">
+        <p class="font-hand text-sm text-muted-foreground">Reishi Roots Lit</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <span id="metric-roots" class="font-display text-4xl">0</span>
+          <span class="font-display text-xl text-muted-foreground">/ 24</span>
+        </div>
+        <p id="metric-armed" class="font-hand text-xs mt-3 text-muted-foreground">Button is currently: Cold</p>
+      </div>
+
+      <div class="panel p-4">
+        <p class="font-hand text-sm text-muted-foreground">System Status</p>
+        <div class="mt-1">
+          <span id="metric-pause-badge" class="font-display text-2xl px-2 py-0.5 rounded-md bg-green-100 text-green-800">ACTIVE</span>
+        </div>
+        <p class="font-hand text-xs mt-3 text-muted-foreground">Scanners and main screen synced</p>
+      </div>
+
+      <div class="panel p-4">
+        <p class="font-hand text-sm text-muted-foreground">Ceremony Status</p>
+        <div class="mt-1">
+          <span id="metric-fired-badge" class="font-display text-2xl px-2 py-0.5 rounded-md bg-secondary text-foreground">PENDING</span>
+        </div>
+        <p class="font-hand text-xs mt-3 text-muted-foreground">Waiting for threshold</p>
+      </div>
+    </div>
+
+    
+    <!-- Public Internet Tunnel Banner (Works across all 4G/5G/Wi-Fi) -->
+    <div class="panel p-4 bg-tetris-cyan/10 border-2 border-foreground space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="pill bg-tetris-cyan text-xs font-bold">🌍 Public Internet Access</span>
+            <span id="tunnel-status-pill" class="pill text-xs bg-green-100 text-green-800">● Live Tunnel</span>
+          </div>
+          <p class="font-hand text-xs text-muted-foreground mt-1">Students can scan the QR code from ANY mobile network (Jio, Airtel, Vi, 5G, or external Wi-Fi)</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a id="btn-open-public" href="#" target="_blank" class="btn-ink text-xs py-1.5 px-3">
+            Open Public Portal ↗
+          </a>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center gap-2 pt-1">
+        <span class="font-display text-xs text-muted-foreground whitespace-nowrap">Active Public URL:</span>
+        <input id="input-public-url" type="text" placeholder="https://xxx.run.pinggy-free.link or custom domain" class="flex-1 w-full rounded-md border-2 border-foreground bg-card px-3 py-1.5 font-mono text-xs text-foreground outline-none">
+        <button onclick="updatePublicUrl()" class="btn-ink text-xs py-1.5 px-4 whitespace-nowrap">Save & Update QR</button>
+      </div>
+    </div>
+
+    <!-- Quick Action Controls -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Left: Stage Control Panel -->
+      <div class="panel p-5 space-y-5">
+        <h2 class="font-display text-xl border-b border-foreground/20 pb-2">Master Controls</h2>
+        
+        <!-- Pause / Play -->
+        <div class="flex items-center justify-between p-3 rounded-xl border-2 border-foreground bg-secondary/50">
+          <div>
+            <h3 class="font-display text-lg">Scanner & Button Gate</h3>
+            <p class="font-hand text-xs text-muted-foreground">Freeze or resume scans and big red button</p>
+          </div>
+          <button id="btn-pause-toggle" type="button" class="btn-warn text-sm">
+            ⏸ Pause System
+          </button>
+        </div>
+
+        <!-- Target Count Controls -->
+        <div class="p-3 rounded-xl border-2 border-foreground bg-secondary/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-display text-lg">Target Makers Count</h3>
+              <p class="font-hand text-xs text-muted-foreground">Scans required to arm the Big Red Button</p>
+            </div>
+            <span id="ctrl-target-display" class="font-display text-2xl">32</span>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="adjustTarget(-5)" class="btn-outline text-xs px-3 py-1">-5</button>
+            <button onclick="adjustTarget(-1)" class="btn-outline text-xs px-3 py-1">-1</button>
+            <input id="input-target" type="number" min="1" max="500" value="32" class="w-20 rounded-md border-2 border-foreground bg-card px-2 py-1 text-center font-display text-foreground outline-none text-sm">
+            <button onclick="setTargetFromInput()" class="btn-ink text-xs px-3 py-1">Set</button>
+            <button onclick="adjustTarget(1)" class="btn-outline text-xs px-3 py-1">+1</button>
+            <button onclick="adjustTarget(5)" class="btn-outline text-xs px-3 py-1">+5</button>
+          </div>
+        </div>
+
+        <!-- Remote Fire & Reset -->
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <button onclick="fireCeremony()" class="btn-danger flex items-center justify-center gap-1.5 py-3">
+            🚨 Remote Fire Button
+          </button>
+          <button onclick="resetStage()" class="btn-outline flex items-center justify-center gap-1.5 py-3">
+            🔄 Reset Ceremony
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Manual Add & Quick Scan -->
+      <div class="panel p-5 space-y-5">
+        <h2 class="font-display text-xl border-b border-foreground/20 pb-2">Manual Ticket Registration</h2>
+        
+        <div class="flex gap-2">
+          <button onclick="quickScan()" class="btn-ink flex-1 flex items-center justify-center gap-2 py-3">
+            ⚡ Quick Scan (+1 Maker)
+          </button>
+        </div>
+
+        <form id="form-manual-scan" onsubmit="handleManualSubmit(event)" class="space-y-3 p-4 rounded-xl border-2 border-dashed border-foreground/40 bg-secondary/30">
+          <h3 class="font-display text-sm uppercase tracking-wider text-muted-foreground">Custom Attendee Check-in</h3>
+          <div>
+            <label class="font-hand text-xs text-muted-foreground block mb-1">Maker Name</label>
+            <input id="input-maker-name" type="text" placeholder="e.g. Anandhu K" class="w-full rounded-md border-2 border-foreground bg-card px-3 py-2 font-hand text-foreground outline-none text-sm">
+          </div>
+          <div>
+            <label class="font-hand text-xs text-muted-foreground block mb-1">Ticket Number / Code</label>
+            <input id="input-ticket-code" type="text" placeholder="e.g. THUB-9942" class="w-full rounded-md border-2 border-foreground bg-card px-3 py-2 font-mono text-foreground outline-none text-sm">
+          </div>
+          <button type="submit" class="btn-success w-full py-2 text-sm">
+            ✓ Check-in Maker
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Live Attendees List -->
+    <div class="panel p-5 space-y-4">
+      <div class="flex items-center justify-between border-b border-foreground/20 pb-3">
+        <div>
+          <h2 class="font-display text-xl">Live Checked-in Makers</h2>
+          <p class="font-hand text-xs text-muted-foreground">Real-time log of tickets scanned</p>
+        </div>
+        <span id="attendee-count-badge" class="pill font-display">0 Records</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b-2 border-foreground font-display text-xs uppercase tracking-wider">
+              <th class="py-2 px-3">#</th>
+              <th class="py-2 px-3">Maker Name</th>
+              <th class="py-2 px-3">Ticket ID</th>
+              <th class="py-2 px-3">Check-in Time</th>
+              <th class="py-2 px-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="attendee-tbody" class="divide-y divide-border font-hand">
+            <tr>
+              <td colspan="5" class="py-6 text-center text-muted-foreground">No check-ins yet. Use Quick Scan or Mobile Scanner.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentState = {
+      target: 32,
+      paused: false,
+      fired: false,
+      attendees: []
+    };
+
+    // Connect SSE for live updates
+    function initSSE() {
+      const statusEl = document.getElementById('sse-status');
+      const evtSource = new EventSource('/api/events');
+
+      evtSource.onopen = () => {
+        statusEl.textContent = '● Live Sync';
+        statusEl.className = 'pill text-xs bg-green-100 text-green-800';
+      };
+
+      evtSource.addEventListener('init', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.state) updateUI(data.state);
+      });
+
+      evtSource.addEventListener('scan', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.state) updateUI(data.state);
+      });
+
+      evtSource.addEventListener('target', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.state) updateUI(data.state);
+      });
+
+      evtSource.addEventListener('pause', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.state) updateUI(data.state);
+      });
+
+      evtSource.addEventListener('fire', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.state) updateUI(data.state);
+      });
+
+      evtSource.addEventListener('reset', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.state) updateUI(data.state);
+      });
+
+      evtSource.addEventListener('delete', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.state) updateUI(data.state);
+      });
+
+      evtSource.onerror = () => {
+        statusEl.textContent = '○ Reconnecting...';
+        statusEl.className = 'pill text-xs bg-yellow-100 text-yellow-800';
+        evtSource.close();
+        setTimeout(initSSE, 2500);
+      };
+    }
+
+    async function updatePublicUrl() {
+      const url = document.getElementById('input-public-url').value.trim();
+      await fetch('/api/tunnel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publicUrl: url })
+      });
+      alert('Public QR code updated!');
+    }
+
+    function updateUI(state) {
+      if (state.publicUrl) {
+        document.getElementById('input-public-url').value = state.publicUrl;
+        document.getElementById('btn-open-public').href = state.publicUrl + '/scan.html';
+        document.getElementById('tunnel-status-pill').textContent = '● Public Online';
+        document.getElementById('tunnel-status-pill').className = 'pill text-xs bg-green-100 text-green-800';
+      } else {
+        document.getElementById('tunnel-status-pill').textContent = '○ Local Network';
+        document.getElementById('tunnel-status-pill').className = 'pill text-xs bg-yellow-100 text-yellow-800';
+      }
+      currentState = state;
+      const count = state.attendees.length;
+      const target = state.target;
+      const roots = Math.min(24, Math.round((count / Math.max(1, target)) * 24));
+      const pct = Math.min(100, Math.round((count / Math.max(1, target)) * 100));
+
+      // Metrics
+      document.getElementById('metric-count').textContent = count;
+      document.getElementById('metric-target').textContent = `/ ${target}`;
+      document.getElementById('metric-bar').style.width = `${pct}%`;
+      document.getElementById('metric-roots').textContent = roots;
+      document.getElementById('ctrl-target-display').textContent = target;
+      document.getElementById('input-target').value = target;
+      document.getElementById('attendee-count-badge').textContent = `${count} Records`;
+
+      // Armed status
+      const armedEl = document.getElementById('metric-armed');
+      if (count >= target) {
+        armedEl.textContent = 'Button is: HOT & ARMED 🔥';
+        armedEl.className = 'font-hand text-xs mt-3 text-btn-red font-bold';
+      } else {
+        armedEl.textContent = `Need ${target - count} more scans to arm button`;
+        armedEl.className = 'font-hand text-xs mt-3 text-muted-foreground';
+      }
+
+      // Pause button & badge
+      const pauseBadge = document.getElementById('metric-pause-badge');
+      const pauseBtn = document.getElementById('btn-pause-toggle');
+      if (state.paused) {
+        pauseBadge.textContent = 'PAUSED';
+        pauseBadge.className = 'font-display text-2xl px-2 py-0.5 rounded-md bg-red-100 text-red-800';
+        pauseBtn.textContent = '▶ Resume System';
+        pauseBtn.className = 'btn-success text-sm';
+      } else {
+        pauseBadge.textContent = 'ACTIVE';
+        pauseBadge.className = 'font-display text-2xl px-2 py-0.5 rounded-md bg-green-100 text-green-800';
+        pauseBtn.textContent = '⏸ Pause System';
+        pauseBtn.className = 'btn-warn text-sm';
+      }
+
+      // Fired badge
+      const firedBadge = document.getElementById('metric-fired-badge');
+      if (state.fired) {
+        firedBadge.textContent = 'INAUGURATED 🎉';
+        firedBadge.className = 'font-display text-2xl px-2 py-0.5 rounded-md bg-tetris-orange text-white';
+      } else {
+        firedBadge.textContent = 'PENDING';
+        firedBadge.className = 'font-display text-2xl px-2 py-0.5 rounded-md bg-secondary text-foreground';
+      }
+
+      // Render table
+      const tbody = document.getElementById('attendee-tbody');
+      if (state.attendees.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-muted-foreground">No check-ins yet. Use Quick Scan or Mobile Scanner.</td></tr>';
+      } else {
+        tbody.innerHTML = state.attendees.map(a => `
+          <tr class="hover:bg-secondary/40">
+            <td class="py-2.5 px-3 font-display font-bold">#${a.id}</td>
+            <td class="py-2.5 px-3 text-base">${escapeHtml(a.name)}</td>
+            <td class="py-2.5 px-3 font-mono text-xs text-muted-foreground">${escapeHtml(a.ticket)}</td>
+            <td class="py-2.5 px-3 text-xs text-muted-foreground">${a.time || '--:--'}</td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="deleteAttendee(${a.id})" class="text-xs text-red-600 hover:text-red-800 font-display px-2 py-1 rounded border border-red-300 hover:bg-red-50 cursor-pointer">
+                ✕ Remove
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // API Calls
+    async function togglePause() {
+      await fetch('/api/pause', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paused: !currentState.paused })
+      });
+    }
+
+    document.getElementById('btn-pause-toggle').addEventListener('click', togglePause);
+
+    async function adjustTarget(delta) {
+      const newTarget = Math.max(1, currentState.target + delta);
+      await fetch('/api/target', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target: newTarget })
+      });
+    }
+
+    async function setTargetFromInput() {
+      const val = parseInt(document.getElementById('input-target').value, 10);
+      if (!isNaN(val) && val > 0) {
+        await fetch('/api/target', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target: val })
+        });
+      }
+    }
+
+    async function quickScan() {
+      const res = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const data = await res.json();
+      if (!data.success) alert(data.message);
+    }
+
+    async function handleManualSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('input-maker-name').value.trim();
+      const ticket = document.getElementById('input-ticket-code').value.trim();
+      const res = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name || undefined, ticket: ticket || undefined })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('input-maker-name').value = '';
+        document.getElementById('input-ticket-code').value = '';
+      } else {
+        alert(data.message);
+      }
+    }
+
+    async function deleteAttendee(id) {
+      if (confirm(`Remove attendee #${id}?`)) {
+        await fetch('/api/attendee/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+      }
+    }
+
+    async function fireCeremony() {
+      if (confirm('Trigger the Inauguration Ceremony on the main screen?')) {
+        await fetch('/api/fire', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fired: true })
+        });
+      }
+    }
+
+    async function resetStage() {
+      if (confirm('Are you sure you want to RESET all check-ins and ceremony stage?')) {
+        await fetch('/api/reset', { method: 'POST' });
+      }
+    }
+
+    // Initialize
+    initSSE();
+    fetch('/api/state').then(r => r.json()).then(updateUI);
+  </script>
+</body>
+</html>

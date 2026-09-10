@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Maker Check-In — Useless Projects 3.0 | SNMIMT TinkerHub</title>
+  <link rel="stylesheet" href="assets/styles-Cc3jfXhB.css">
+  <link rel="stylesheet" href="_external/fonts.googleapis.com/css2.family_Fredoka_wght_500_600_700_family_Patrick_Hand_display_swap.css">
+  <style>
+    body {
+      background-color: var(--background, #FAF9F6);
+      color: var(--foreground, #1B1B1B);
+      font-family: 'Fredoka', -apple-system, sans-serif;
+    }
+    .font-hand {
+      font-family: 'Patrick Hand', cursive;
+    }
+    .font-display {
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 700;
+    }
+    .panel {
+      background: var(--card, #FFFFFF);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 20px;
+      box-shadow: 4px 6px 0 0 var(--foreground, #1B1B1B);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 4px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--secondary, #F4F2EB);
+    }
+    .btn-ink {
+      background: var(--foreground, #1B1B1B);
+      color: var(--background, #FAF9F6);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 14px 28px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 2px 4px 0 0 rgba(0,0,0,0.3);
+      transition: all 0.15s ease;
+    }
+    .btn-ink:hover {
+      transform: translateY(-2px);
+    }
+    .btn-ink:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-4 flex flex-col items-center justify-center">
+  <div class="w-full max-w-md space-y-5">
+    <!-- Header -->
+    <header class="text-center space-y-2">
+      <div class="flex items-center justify-center gap-2">
+        <span class="pill bg-tetris-yellow">⚡ Live Inauguration</span>
+        <span id="status-badge" class="pill text-xs bg-green-100 text-green-800">● Open</span>
+      </div>
+      <h1 class="font-display text-3xl">Useless Projects 3.0</h1>
+      <p class="font-hand text-base text-muted-foreground">SNMIMT TinkerHub Campus Community</p>
+    </header>
+
+    <!-- Main Registration Panel -->
+    <div id="form-panel" class="panel p-6 space-y-5">
+      <div class="space-y-1">
+        <h2 class="font-display text-xl">Register & Charge a Root</h2>
+        <p class="font-hand text-sm text-muted-foreground">Enter your name to light up the main stage reishi console!</p>
+      </div>
+
+      <form id="checkin-form" onsubmit="submitCheckin(event)" class="space-y-4">
+        <div>
+          <label class="font-display text-xs uppercase tracking-wider text-muted-foreground block mb-1.5">Your Name / Maker Alias</label>
+          <input id="maker-name" type="text" required placeholder="e.g. Alan Turing" autofocus class="w-full rounded-xl border-2 border-foreground bg-card p-3.5 font-hand text-base text-foreground outline-none focus:ring-2 focus:ring-tetris-cyan">
+        </div>
+
+        <div>
+          <label class="font-display text-xs uppercase tracking-wider text-muted-foreground block mb-1.5">Ticket ID (optional)</label>
+          <input id="maker-ticket" type="text" placeholder="e.g. THUB-3210" class="w-full rounded-xl border-2 border-foreground bg-card p-3.5 font-mono text-sm text-foreground outline-none focus:ring-2 focus:ring-tetris-cyan">
+        </div>
+
+        <button id="btn-submit" type="submit" class="btn-ink w-full flex items-center justify-center gap-2 text-lg bg-reishi text-foreground border-foreground mt-2">
+          🚀 Light the Stage Root!
+        </button>
+      </form>
+    </div>
+
+    <!-- Success Confirmation State (Hidden initially) -->
+    <div id="success-panel" class="panel p-8 text-center space-y-4 hidden animate-stamp-in">
+      <div class="w-16 h-16 rounded-full bg-green-100 border-2 border-foreground flex items-center justify-center mx-auto text-3xl">
+        🎉
+      </div>
+      <h2 class="font-display text-2xl text-foreground">You're Checked In!</h2>
+      <p class="font-hand text-lg text-muted-foreground">
+        Welcome <strong id="success-name" class="text-foreground"></strong>! Look at the big screen — your root is glowing! ✨
+      </p>
+      <button onclick="resetForm()" class="btn-ink text-sm py-2 px-6">
+        Register Another Maker
+      </button>
+    </div>
+
+    <!-- Live Stage Counter Widget -->
+    <div class="panel p-4 flex items-center justify-between">
+      <div>
+        <p class="font-hand text-xs text-muted-foreground">Total Makers In</p>
+        <span id="counter-num" class="font-display text-2xl">0 / 32</span>
+      </div>
+      <a href="/" class="font-hand text-xs text-muted-foreground underline hover:text-foreground">
+        View Big Screen ↗
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Autofill ticket parameter if present
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('ticket')) {
+      document.getElementById('maker-ticket').value = params.get('ticket');
+    }
+    if (params.get('name')) {
+      document.getElementById('maker-name').value = params.get('name');
+    }
+
+    // SSE Sync
+    function initSSE() {
+      const evt = new EventSource('/api/events');
+      evt.addEventListener('init', e => updateCounter(JSON.parse(e.data).state));
+      evt.addEventListener('scan', e => updateCounter(JSON.parse(e.data).state));
+      evt.addEventListener('target', e => updateCounter(JSON.parse(e.data).state));
+      evt.addEventListener('pause', e => updateCounter(JSON.parse(e.data).state));
+      evt.addEventListener('reset', e => updateCounter(JSON.parse(e.data).state));
+      evt.onerror = () => {
+        evt.close();
+        setTimeout(initSSE, 3000);
+      };
+    }
+
+    function updateCounter(state) {
+      if (!state) return;
+      document.getElementById('counter-num').textContent = `${state.attendees.length} / ${state.target}`;
+      const statusBadge = document.getElementById('status-badge');
+      if (state.paused) {
+        statusBadge.textContent = '⏸ Paused';
+        statusBadge.className = 'pill text-xs bg-red-100 text-red-800';
+      } else if (state.fired) {
+        statusBadge.textContent = '🎉 Inaugurated!';
+        statusBadge.className = 'pill text-xs bg-tetris-orange text-white';
+      } else {
+        statusBadge.textContent = '● Open';
+        statusBadge.className = 'pill text-xs bg-green-100 text-green-800';
+      }
+    }
+
+    async function submitCheckin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+      const name = document.getElementById('maker-name').value.trim();
+      const ticket = document.getElementById('maker-ticket').value.trim();
+
+      btn.disabled = true;
+      btn.textContent = 'Registering...';
+
+      try {
+        const res = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name || undefined, ticket: ticket || undefined })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          if (navigator.vibrate) navigator.vibrate([60, 40, 80]);
+          document.getElementById('success-name').textContent = name || 'Maker';
+          document.getElementById('form-panel').classList.add('hidden');
+          document.getElementById('success-panel').classList.remove('hidden');
+        } else {
+          alert(data.message || 'Check-in failed');
+        }
+      } catch (err) {
+        alert('Connection error. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🚀 Light the Stage Root!';
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('maker-name').value = '';
+      document.getElementById('maker-ticket').value = '';
+      document.getElementById('success-panel').classList.add('hidden');
+      document.getElementById('form-panel').classList.remove('hidden');
+    }
+
+    initSSE();
+    fetch('/api/state').then(r => r.json()).then(updateCounter);
+  </script>
+</body>
+</html>

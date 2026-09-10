@@ -81,8 +81,8 @@
         </div>
 
         <div>
-          <label class="font-display text-xs uppercase tracking-wider text-muted-foreground block mb-1.5">Ticket ID (optional)</label>
-          <input id="maker-ticket" type="text" placeholder="e.g. THUB-3210" class="w-full rounded-xl border-2 border-foreground bg-card p-3.5 font-mono text-sm text-foreground outline-none focus:ring-2 focus:ring-tetris-cyan">
+          <label class="font-display text-xs uppercase tracking-wider text-muted-foreground block mb-1.5">Team Name</label>
+          <input id="maker-team" type="text" placeholder="e.g. Byte Bandits" class="w-full rounded-xl border-2 border-foreground bg-card p-3.5 font-hand text-base text-foreground outline-none focus:ring-2 focus:ring-tetris-cyan">
         </div>
 
         <button id="btn-submit" type="submit" class="btn-ink w-full flex items-center justify-center gap-2 text-lg bg-reishi text-foreground border-foreground mt-2">
@@ -100,9 +100,6 @@
       <p class="font-hand text-lg text-muted-foreground">
         Welcome <strong id="success-name" class="text-foreground"></strong>! Look at the big screen — your root is glowing! ✨
       </p>
-      <button onclick="resetForm()" class="btn-ink text-sm py-2 px-6">
-        Register Another Maker
-      </button>
     </div>
 
     <!-- Live Stage Counter Widget -->
@@ -111,18 +108,12 @@
         <p class="font-hand text-xs text-muted-foreground">Total Makers In</p>
         <span id="counter-num" class="font-display text-2xl">0 / 32</span>
       </div>
-      <a href="/" class="font-hand text-xs text-muted-foreground underline hover:text-foreground">
-        View Big Screen ↗
-      </a>
     </div>
   </div>
 
   <script>
-    // Autofill ticket parameter if present
+    // Autofill name parameter if present
     const params = new URLSearchParams(window.location.search);
-    if (params.get('ticket')) {
-      document.getElementById('maker-ticket').value = params.get('ticket');
-    }
     if (params.get('name')) {
       document.getElementById('maker-name').value = params.get('name');
     }
@@ -161,7 +152,7 @@
       e.preventDefault();
       const btn = document.getElementById('btn-submit');
       const name = document.getElementById('maker-name').value.trim();
-      const ticket = document.getElementById('maker-ticket').value.trim();
+      const team = document.getElementById('maker-team').value.trim();
 
       btn.disabled = true;
       btn.textContent = 'Registering...';
@@ -170,7 +161,7 @@
         const res = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name || undefined, ticket: ticket || undefined })
+          body: JSON.stringify({ name: name || undefined, ticket: team || undefined })
         });
         const data = await res.json();
 
@@ -188,13 +179,6 @@
         btn.disabled = false;
         btn.textContent = '🚀 Light the Stage Root!';
       }
-    }
-
-    function resetForm() {
-      document.getElementById('maker-name').value = '';
-      document.getElementById('maker-ticket').value = '';
-      document.getElementById('success-panel').classList.add('hidden');
-      document.getElementById('form-panel').classList.remove('hidden');
     }
 
     initSSE();

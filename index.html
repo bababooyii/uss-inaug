@@ -54,6 +54,19 @@
     .btn-ink:active {
       transform: translateY(1px);
     }
+    .btn-outline {
+      background: transparent;
+      color: var(--foreground, #1B1B1B);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 10px 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-outline:hover {
+      background: var(--secondary, #F4F2EB);
+    }
     .root-path {
       transition: opacity 420ms ease, transform 820ms cubic-bezier(.16,.9,.28,1);
       transform-origin: 500px 500px;
@@ -65,11 +78,7 @@
   <header class="border-b-2 border-foreground bg-foreground px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="w-24"></div>
     <img src="__l5e/assets-v1/634a551f-8685-4759-b46e-fdbe6a390438/tinkerhub-snmimt-banner.png" alt="TinkerHub SNMIMT" class="h-14 sm:h-18 w-auto object-contain">
-    <div class="w-24 flex justify-end">
-      <a href="admin.html" target="_blank" class="pill bg-card/20 text-card text-xs hover:bg-card/40 transition-colors border-card font-hand">
-        ⚙ Admin Panel
-      </a>
-    </div>
+    <div class="w-24"></div>
   </header>
 
   <!-- Main Display Stage -->
@@ -84,7 +93,7 @@
         </div>
 
         <h2 class="font-display text-2xl leading-tight">Scan to Charge the Roots</h2>
-        <p class="font-hand text-muted-foreground text-sm">Scan with your phone to register your ticket & light the inauguration console</p>
+        <p class="font-hand text-muted-foreground text-sm">Scan with your phone & enter your name to light up the inauguration console</p>
 
         <!-- QR Code — served by THIS server (admin-uploaded or auto-generated) -->
         <div class="flex justify-center my-2">
@@ -118,18 +127,19 @@
     </section>
 
     <!-- Right Column: 24 Reishi Roots & Big Red Button Stage -->
-    <section class="panel relative flex min-h-[72vh] flex-col items-center justify-center overflow-hidden p-6">
+    <section class="panel relative flex min-h-[72vh] flex-col items-center justify-center overflow-hidden p-6 gap-4 lg:flex-row lg:items-stretch lg:gap-6">
       <!-- Status Top Badges -->
-      <div class="absolute left-6 top-6 flex gap-2">
+      <div class="relative z-10 -mb-2 flex flex-wrap justify-center gap-2 lg:absolute lg:left-6 lg:top-6 lg:-mb-0">
         <span id="roots-badge" class="pill font-display">reishi: 0/24 roots</span>
+        <span id="lock-badge" class="pill font-display bg-yellow-100 text-yellow-900" style="display:none">🔒 LOCKED</span>
       </div>
-      <div class="absolute right-6 top-6 flex gap-2">
+      <!-- Center Reishi Roots SVG & Button -->
+      <div class="relative grid aspect-square w-full max-w-[620px] flex-1 place-items-center">
+      <div class="absolute right-2 top-2 flex gap-2">
         <span class="h-6 w-6 animate-float-soft rounded-full border-4 border-tetris-magenta bg-tetris-cyan"></span>
         <span class="h-6 w-6 animate-float-soft rounded-full border-4 border-tetris-red bg-tetris-yellow"></span>
       </div>
 
-      <!-- Center Reishi Roots SVG & Button -->
-      <div class="relative grid aspect-square w-full max-w-[620px] place-items-center">
         <!-- Reishi SVG Canvas -->
         <div class="absolute inset-0 pointer-events-none">
           <svg id="reishi-svg" viewBox="0 0 1000 1000" class="h-full w-full overflow-visible" aria-hidden="true">
@@ -188,10 +198,32 @@
           </p>
         </div>
       </div>
+
+      <!-- Brochure / Menu Slideshow -->
+      <div id="brochure-panel" class="panel hidden w-full max-w-[300px] min-h-[420px] shrink-0 p-3 lg:w-[280px] lg:max-w-none lg:min-h-0 lg:self-stretch flex flex-col items-center justify-center gap-3">
+        <span class="pill font-display text-xs bg-tetris-cyan">📜 Menu / Brochure</span>
+        <div id="brochure-stage" class="flex-1 w-full flex items-center justify-center overflow-hidden rounded-xl border-2 border-foreground bg-card min-h-[320px]"></div>
+        <p id="brochure-caption" class="font-hand text-xs text-muted-foreground text-center"></p>
+      </div>
     </section>
   </main>
 
   <!-- Celebration Modal (GPU Canvas Particles - Zero Lag) -->
+  <!-- Secret Admin Gate (footer heart × 5) -->
+  <div id="secret-admin-overlay" class="fixed inset-0 z-[60] hidden place-items-center bg-background/95 backdrop-blur-md">
+    <div class="panel p-8 w-full max-w-sm text-center space-y-4">
+      <h2 class="font-display text-2xl">Admin Access</h2>
+      <p class="font-hand text-sm text-muted-foreground">Enter the admin password</p>
+      <input id="admin-password-input" type="password" placeholder="Password" autocomplete="off"
+             class="w-full rounded-xl border-2 border-foreground bg-card p-3 text-center font-display tracking-widest outline-none">
+      <p id="admin-gate-error" class="font-hand text-sm text-btn-red hidden">Wrong password</p>
+      <div class="flex gap-2 justify-center">
+        <button id="admin-gate-cancel" class="btn-outline px-4 py-2 text-sm">Cancel</button>
+        <button id="admin-gate-enter" class="btn-ink px-6 py-2 text-sm">Unlock →</button>
+      </div>
+    </div>
+  </div>
+
   <div id="celebration-modal" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center overflow-hidden bg-background/95 backdrop-blur-md px-6 text-center animate-stamp-in">
     <canvas id="confetti-canvas" class="pointer-events-none absolute inset-0 h-full w-full"></canvas>
     
@@ -214,7 +246,7 @@
 
   <!-- Footer -->
   <footer class="px-6 py-4 text-center font-hand text-sm text-muted-foreground border-t border-border/40">
-    built with <span class="text-btn-red">♥</span> for the snmimt tinkerhub campus community
+    built with <span id="secret-heart" class="text-btn-red cursor-pointer select-none" title="">♥</span> for the snmimt tinkerhub campus community
   </footer>
 
   <script>
@@ -368,15 +400,55 @@
     // QR image comes from our own server (/api/qr) — either the admin-uploaded
     // custom QR or an auto-generated one for the current public URL.
     function updateQRCode(s) {
-      const base = s.publicUrl || window.location.origin;
+      const base = (s && s.publicUrl) || window.location.origin;
       const scanPortalUrl = `${base}/scan.html`;
       const img = document.getElementById('qr-img');
-      img.src = `/api/qr?t=${Date.now()}`;
+      const wanted = `/api/qr?t=${qrStamp}`;
+      if (!img.src.endsWith(wanted)) img.src = wanted;
       const linkEl = document.getElementById('qr-url-text');
       if (linkEl) {
         linkEl.textContent = scanPortalUrl;
         linkEl.href = scanPortalUrl;
       }
+    }
+
+    // ----- Brochure / Menu Slideshow (right of the button) -----
+    let brochureStamp = Date.now();
+    let brochureIdx = 0;
+    let brochureCount = 0;
+    let brochureTimer = null;
+
+    function updateBrochure(state) {
+      const panel = document.getElementById('brochure-panel');
+      const stage = document.getElementById('brochure-stage');
+      const caption = document.getElementById('brochure-caption');
+      const info = (state && state.brochure) || { count: 0 };
+      const n = info.count || 0;
+
+      if (!n) {
+        panel.classList.add('hidden');
+        stage.innerHTML = '<p class="font-hand text-sm text-muted-foreground p-6 text-center">Menu / brochure will appear here once the admin uploads it.</p>';
+        caption.textContent = '';
+        if (brochureTimer) { clearInterval(brochureTimer); brochureTimer = null; }
+        brochureCount = 0;
+        return;
+      }
+
+      const changed = n !== brochureCount;
+      panel.classList.remove('hidden');
+      brochureCount = n;
+      if (changed) brochureIdx = 0;
+
+      function show() {
+        const i = brochureIdx % n;
+        stage.innerHTML = `<img src="/api/brochure?i=${i}&t=${brochureStamp}" class="max-h-[380px] max-w-full object-contain rounded-lg" alt="Brochure page ${i + 1}">`;
+        caption.textContent = n > 1 ? `page ${i + 1} / ${n}` : (info.names && info.names[i] ? info.names[i] : '');
+        brochureIdx = (brochureIdx + 1) % n;
+      }
+      show();
+
+      if (brochureTimer) clearInterval(brochureTimer);
+      brochureTimer = n > 1 ? setInterval(show, 4000) : null;
     }
 
     // State Management & Real-Time Sync
@@ -386,6 +458,7 @@
       fired: false,
       attendees: []
     };
+    let qrStamp = Date.now();
 
     function updateStateUI(s) {
       if (s) updateQRCode(s);
@@ -419,6 +492,13 @@
         }
       }
 
+      // Update lock badge
+      const lockBadge = document.getElementById('lock-badge');
+      if (lockBadge) lockBadge.style.display = s.buttonLocked ? 'inline-flex' : 'none';
+
+      // Update Brochure Slideshow
+      updateBrochure(s);
+
       // Update Button State
       const btn = document.getElementById('inauguration-btn');
       const label = document.getElementById('btn-label');
@@ -433,6 +513,15 @@
         caption.textContent = "reishi released. useless projects 3.0 is live <3";
         shockwave.classList.add('hidden');
         showCelebrationModal(count);
+      } else if (s.buttonLocked) {
+        btn.disabled = true;
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";
+        btn.style.boxShadow = "0 8px 0 0 color-mix(in oklab, var(--color-btn-red-dark) 35%, transparent)";
+        label.textContent = "LOCKED";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-foreground/40";
+        caption.textContent = "🔒 button is locked by the admin";
+        shockwave.classList.add('hidden');
+        hideCelebrationModal();
       } else if (s.paused) {
         btn.disabled = true;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";
@@ -496,6 +585,8 @@
       evt.addEventListener('fire', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('reset', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('delete', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('lock', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('brochure', e => updateStateUI(JSON.parse(e.data).state));
 
       evt.onerror = () => {
         ind.textContent = '○ Reconnecting...';
@@ -507,7 +598,7 @@
 
     // Inauguration Button Trigger
     document.getElementById('inauguration-btn').addEventListener('click', async () => {
-      if (state.attendees.length >= state.target && !state.fired && !state.paused) {
+      if (state.attendees.length >= state.target && !state.fired && !state.paused && !state.buttonLocked) {
         await fetch('/api/fire', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -605,6 +696,51 @@
           await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
         }
       }
+    });
+
+    // ----- Secret Admin Gate: click the footer heart 5 times -----
+    let heartClicks = 0;
+    let heartTimer = null;
+
+    document.getElementById('secret-heart').addEventListener('click', () => {
+      heartClicks++;
+      clearTimeout(heartTimer);
+      heartTimer = setTimeout(() => { heartClicks = 0; }, 2500);
+      if (heartClicks >= 5) {
+        heartClicks = 0;
+        const overlay = document.getElementById('secret-admin-overlay');
+        overlay.classList.remove('hidden');
+        overlay.classList.add('grid');
+        document.getElementById('admin-password-input').value = '';
+        document.getElementById('admin-gate-error').classList.add('hidden');
+        setTimeout(() => document.getElementById('admin-password-input').focus(), 50);
+      }
+    });
+
+    function closeAdminGate() {
+      const overlay = document.getElementById('secret-admin-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('grid');
+    }
+
+    function tryAdminEnter() {
+      const val = document.getElementById('admin-password-input').value;
+      if (val === 'hello') {
+        closeAdminGate();
+        window.open('admin.html', '_blank');
+      } else {
+        const err = document.getElementById('admin-gate-error');
+        err.classList.remove('hidden');
+        document.getElementById('admin-password-input').value = '';
+        document.getElementById('admin-password-input').focus();
+      }
+    }
+
+    document.getElementById('admin-gate-enter').addEventListener('click', tryAdminEnter);
+    document.getElementById('admin-gate-cancel').addEventListener('click', closeAdminGate);
+    document.getElementById('admin-password-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') tryAdminEnter();
+      if (e.key === 'Escape') closeAdminGate();
     });
 
     // Start

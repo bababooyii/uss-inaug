@@ -31,6 +31,8 @@ sys.path.insert(0, os.path.join(BASE_DIR, "vendor"))
 
 ALLOWED_QR_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"}
 MAX_QR_SIZE = 5 * 1024 * 1024  # 5 MB
+ALLOWED_BROCHURE_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"}
+MAX_BROCHURE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 class StateManager:
     def __init__(self):
@@ -42,6 +44,8 @@ class StateManager:
         self.clients = set()
         self.public_url = RENDER_EXTERNAL_URL
         self.custom_qr = None  # (mime_type, bytes) — admin-uploaded QR image
+        self.button_locked = False  # admin gate: big red button is dead while True
+        self.brochure = []  # list of {mime, data, name} — brochure/menu slideshow images
         self.local_ip = self._get_local_ip()
         self.default_names = [
             "aadhi", "nandana", "sreehari", "fathima", "anaswara",
@@ -74,6 +78,12 @@ class StateManager:
                 "rootsLit": roots_lit,
                 "armed": armed,
                 "publicUrl": self.public_url,
+                "buttonLocked": self.button_locked,
+                "customQr": self.custom_qr is not None,
+                "brochure": {
+                    "count": len(self.brochure),
+                    "names": [b["name"] for b in self.brochure],
+                },
                 "localIp": self.local_ip,
                 "port": PORT
             }
@@ -159,18 +169,37 @@ class StateManager:
         self.broadcast("tunnel", {"publicUrl": self.public_url})
         return True, "Custom QR cleared (back to auto-generated)"
 
-    def set_custom_qr(self, mime, data):
-        """Store an admin-uploaded QR image (displayed on the main screen)."""
+    def set_button_locked(self, is_locked):
         with self.lock:
-            self.custom_qr = (mime, data)
-        self.broadcast("tunnel", {"publicUrl": self.public_url})
-        return True, "Custom QR uploaded"
+            self.button_locked = bool(is_locked)
+        self.broadcast("lock", {"buttonLocked": self.button_locked})
+        return True, "Button lock updated"
 
-    def clear_custom_qr(self):
+    def add_brochure(self, mime, data, name=""):
+        """Append a brochure/menu image to the big-screen slideshow."""
         with self.lock:
-            self.custom_qr = None
-        self.broadcast("tunnel", {"publicUrl": self.public_url})
-        return True, "Custom QR cleared (back to auto-generated)"
+            if len(self.brochure) >= 10:
+                return False, "Slideshow full (max 10 images) — remove one first"
+            self.brochure.append({"mime": mime, "data": data, "name": str(name)[:120]})
+        self.broadcast("brochure", {"count": len(self.brochure)})
+        return True, f"Brochure image added ({len(self.brochure)} in slideshow)"
+
+    def remove_brochure(self, index):
+        try:
+            idx = int(index)
+        except (TypeError, ValueError):
+            return False, "Invalid index"
+        with self.lock:
+            if 0 <= idx < len(self.brochure):
+                self.brochure.pop(idx)
+        self.broadcast("brochure", {"count": len(self.brochure)})
+        return True, "Brochure image removed"
+
+    def clear_brochure(self):
+        with self.lock:
+            self.brochure = []
+        self.broadcast("brochure", {"count": 0})
+        return True, "Brochure cleared"
 
     def set_public_url(self, url):
         with self.lock:
@@ -265,6 +294,10 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_qr_image()
             return
 
+        if path == "/api/brochure":
+            self.handle_brochure_image()
+            return
+
         super().do_GET()
 
     def do_POST(self):
@@ -273,6 +306,10 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == "/api/qr/upload":
             self.handle_qr_upload()
+            return
+
+        if path == "/api/brochure/upload":
+            self.handle_brochure_upload()
             return
 
         content_type = self.headers.get("Content-Type", "")
@@ -286,6 +323,24 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
             data = json.loads(body) if body else {}
         except Exception:
             data = {}
+
+        if path == "/api/brochure/clear":
+            success, msg = state_manager.clear_brochure()
+            self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
+            return
+
+        if path == "/api/brochure/remove":
+            success, msg = state_manager.remove_brochure(data.get("index"))
+            self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
+            return
+
+        if path == "/api/lock":
+            locked = data.get("locked")
+            if locked is None:
+                locked = not state_manager.button_locked
+            success, msg = state_manager.set_button_locked(locked)
+            self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
+            return
 
         if path == "/api/scan":
             ticket = data.get("ticket") or urllib.parse.parse_qs(parsed.query).get("ticket", [None])[0]
@@ -320,9 +375,12 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path == "/api/fire":
-            fired = data.get("fired", True)
-            success, msg = state_manager.set_fired(fired)
-            self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
+            if state_manager.button_locked:
+                self.send_json(400, {"success": False, "message": "Button is LOCKED — unlock it in the admin panel (yellow) first.", "state": state_manager.get_state()})
+            else:
+                fired = data.get("fired", True)
+                success, msg = state_manager.set_fired(fired)
+                self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
             return
 
         if path == "/api/reset":
@@ -356,6 +414,94 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_bytes(200, "image/png", buf.getvalue())
         except Exception as e:
             self.send_json(500, {"error": f"QR generation failed: {e}"})
+
+    def handle_brochure_image(self):
+        """Serve brochure/menu slideshow images: /api/brochure?i=2 (default 0)."""
+        slides = state_manager.brochure
+        if not slides:
+            self.send_json(404, {"error": "No brochure uploaded"})
+            return
+        try:
+            idx = int(urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("i", ["0"])[0])
+        except ValueError:
+            idx = 0
+        idx = max(0, min(idx, len(slides) - 1))
+        slide = slides[idx]
+        self.send_bytes(200, slide["mime"], slide["data"])
+
+    def handle_brochure_upload(self):
+        """Parse a multipart/form-data upload containing the brochure/menu image."""
+        content_type = self.headers.get("Content-Type", "")
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+        except ValueError:
+            length = 0
+        if length <= 0 or length > MAX_BROCHURE_SIZE:
+            self.send_json(400, {"error": "Empty or too-large upload (max 10 MB)"})
+            return
+        body = self.rfile.read(length)
+
+        m = re.search(r'boundary="?([^";]+)"?', content_type)
+        if not m:
+            self.send_json(400, {"error": "No multipart boundary found"})
+            return
+
+        try:
+            part_mime = None
+            filename = None
+            payload = None
+            boundary = m.group(1).strip().encode("utf-8")
+            delim = b"--" + boundary
+            for chunk in body.split(delim):
+                chunk = chunk.strip(b"\r\n")
+                if not chunk or chunk == b"--":
+                    continue
+                header_blob, _, payload = chunk.partition(b"\r\n\r\n")
+                headers = header_blob.decode("utf-8", "replace")
+                nm = re.search(r'name="([^"]*)"', headers)
+                fm = re.search(r'filename="([^"]*)"', headers)
+                cm = re.search(r"Content-Type:\s*([^\r\n]+)", headers, re.I)
+                if fm:
+                    filename = fm.group(1)
+                if cm:
+                    part_mime = cm.group(1).strip().split(";")[0]
+                if nm and nm.group(1) == "brochure" and payload is not None:
+                    payload = payload.rstrip(b"\r\n")
+                    break
+            else:
+                payload = None
+        except Exception as e:
+            self.send_json(400, {"error": f"Bad multipart payload: {e}"})
+            return
+
+        if not payload:
+            self.send_json(400, {"error": "No file received (expected field 'brochure')"})
+            return
+
+        mime = (part_mime or "").split(";")[0].strip().lower()
+        if mime not in ALLOWED_BROCHURE_TYPES:
+            if filename and filename.lower().endswith(".svg"):
+                mime = "image/svg+xml"
+            elif payload[:8] == b"\x89PNG\r\n\x1a\n":
+                mime = "image/png"
+            elif payload[:3] == b"\xff\xd8\xff":
+                mime = "image/jpeg"
+            elif payload[:4] == b"GIF8":
+                mime = "image/gif"
+            elif payload[:4] == b"RIFF" and payload[8:12] == b"WEBP":
+                mime = "image/webp"
+            elif b"<svg" in payload[:512]:
+                mime = "image/svg+xml"
+            else:
+                self.send_json(400, {"error": f"Unsupported image type: {mime or 'unknown'}"})
+                return
+
+        if len(payload) > MAX_BROCHURE_SIZE:
+            self.send_json(400, {"error": "Image too large (max 10 MB)"})
+            return
+
+        success, msg = state_manager.add_brochure(mime, payload, filename or "")
+        self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
 
     def handle_qr_upload(self):
         """Parse a multipart/form-data upload containing the custom QR image."""

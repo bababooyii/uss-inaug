@@ -20,6 +20,10 @@ import queue
 PORT = int(os.environ.get("PORT", 8000))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Render.com (and most PaaS) expose the public URL via env vars.
+IS_RENDER = bool(os.environ.get("RENDER"))
+RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+
 class StateManager:
     def __init__(self):
         self.lock = threading.Lock()
@@ -28,7 +32,7 @@ class StateManager:
         self.fired = False
         self.attendees = []
         self.clients = set()
-        self.public_url = ""
+        self.public_url = RENDER_EXTERNAL_URL
         self.local_ip = self._get_local_ip()
         self.default_names = [
             "aadhi", "nandana", "sreehari", "fathima", "anaswara",
@@ -159,13 +163,22 @@ class StateManager:
 
 state_manager = StateManager()
 
-# Background Public Tunnel Manager
+# Background Public Tunnel Manager (only used when running locally)
 class TunnelManager(threading.Thread):
     def __init__(self):
         super().__init__(daemon=True)
         self.proc = None
 
     def run(self):
+        if IS_RENDER:
+            # On Render the service is already public — no tunnel needed.
+            if RENDER_EXTERNAL_URL:
+                print(f"\n=======================================================")
+                print(f"🌍 PUBLIC URL (Render): {RENDER_EXTERNAL_URL}")
+                print(f"👉 Registration Link: {RENDER_EXTERNAL_URL}/scan.html")
+                print(f"=======================================================\n")
+                state_manager.set_public_url(RENDER_EXTERNAL_URL)
+            return
         time.sleep(1)
         print("[Tunnel] Starting public internet tunnel...")
         try:
@@ -277,6 +290,7 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
         self.send_header("Connection", "keep-alive")
+        self.send_header("X-Accel-Buffering", "no")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
 
@@ -315,9 +329,23 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
     allow_reuse_address = True
 
+def keep_alive_loop():
+    """Pings itself every 10 min so Render's free tier doesn't spin down mid-event."""
+    import urllib.request
+    url = (RENDER_EXTERNAL_URL or f"http://localhost:{PORT}") + "/api/state"
+    while True:
+        time.sleep(600)
+        try:
+            urllib.request.urlopen(url, timeout=15).read()
+            print("[KeepAlive] ping ok")
+        except Exception as e:
+            print(f"[KeepAlive] ping failed: {e}")
+
 def run():
     tunnel_thread = TunnelManager()
     tunnel_thread.start()
+    if IS_RENDER:
+        threading.Thread(target=keep_alive_loop, daemon=True).start()
 
     server = ThreadedHTTPServer(("0.0.0.0", PORT), CustomRequestHandler)
     print(f"[Server] Serving on http://0.0.0.0:{PORT} (Local: http://localhost:{PORT})")

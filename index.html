@@ -86,10 +86,11 @@
         <h2 class="font-display text-2xl leading-tight">Scan to Charge the Roots</h2>
         <p class="font-hand text-muted-foreground text-sm">Scan with your phone to register your ticket & light the inauguration console</p>
 
-        <!-- Dynamic High-Resolution QR Code -->
+        <!-- QR Code — served by THIS server (admin-uploaded or auto-generated) -->
         <div class="flex justify-center my-2">
           <div class="p-3 bg-[#FAF9F6] border-2 border-foreground rounded-2xl shadow-sm inline-block">
-            <img id="qr-img" src="" alt="Scan QR Code to Register" class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg">
+            <img id="qr-img" src="/api/qr" alt="Scan QR Code to Register" class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg">
+          </div>
           </div>
           <div class="mt-1 text-center">
             <a id="qr-url-text" href="/scan.html" target="_blank" class="font-mono text-xs text-muted-foreground hover:text-foreground underline break-all">/scan.html</a>
@@ -364,11 +365,13 @@
       rootsContainer.appendChild(g);
     });
 
-    // Set QR code dynamic link function
+    // QR image comes from our own server (/api/qr) — either the admin-uploaded
+    // custom QR or an auto-generated one for the current public URL.
     function updateQRCode(s) {
       const base = s.publicUrl || window.location.origin;
       const scanPortalUrl = `${base}/scan.html`;
-      document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(scanPortalUrl)}&bgcolor=FAF9F6&color=1B1B1B&margin=1`;
+      const img = document.getElementById('qr-img');
+      img.src = `/api/qr?t=${Date.now()}`;
       const linkEl = document.getElementById('qr-url-text');
       if (linkEl) {
         linkEl.textContent = scanPortalUrl;

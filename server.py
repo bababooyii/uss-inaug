@@ -16,6 +16,7 @@ from datetime import datetime
 import subprocess
 import re
 import queue
+import io
 
 PORT = int(os.environ.get("PORT", 8000))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,6 +24,13 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Render.com (and most PaaS) expose the public URL via env vars.
 IS_RENDER = bool(os.environ.get("RENDER"))
 RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+
+# Vendored segno (pure-Python QR generator) so the QR is served from THIS server
+# and never depends on external image APIs that campus networks may block.
+sys.path.insert(0, os.path.join(BASE_DIR, "vendor"))
+
+ALLOWED_QR_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"}
+MAX_QR_SIZE = 5 * 1024 * 1024  # 5 MB
 
 class StateManager:
     def __init__(self):
@@ -33,6 +41,7 @@ class StateManager:
         self.attendees = []
         self.clients = set()
         self.public_url = RENDER_EXTERNAL_URL
+        self.custom_qr = None  # (mime_type, bytes) — admin-uploaded QR image
         self.local_ip = self._get_local_ip()
         self.default_names = [
             "aadhi", "nandana", "sreehari", "fathima", "anaswara",
@@ -137,6 +146,32 @@ class StateManager:
         self.broadcast("fire", {"fired": self.fired})
         return True, "Fire state updated"
 
+    def set_custom_qr(self, mime, data):
+        """Store an admin-uploaded QR image (displayed on the main screen)."""
+        with self.lock:
+            self.custom_qr = (mime, data)
+        self.broadcast("tunnel", {"publicUrl": self.public_url})
+        return True, "Custom QR uploaded"
+
+    def clear_custom_qr(self):
+        with self.lock:
+            self.custom_qr = None
+        self.broadcast("tunnel", {"publicUrl": self.public_url})
+        return True, "Custom QR cleared (back to auto-generated)"
+
+    def set_custom_qr(self, mime, data):
+        """Store an admin-uploaded QR image (displayed on the main screen)."""
+        with self.lock:
+            self.custom_qr = (mime, data)
+        self.broadcast("tunnel", {"publicUrl": self.public_url})
+        return True, "Custom QR uploaded"
+
+    def clear_custom_qr(self):
+        with self.lock:
+            self.custom_qr = None
+        self.broadcast("tunnel", {"publicUrl": self.public_url})
+        return True, "Custom QR cleared (back to auto-generated)"
+
     def set_public_url(self, url):
         with self.lock:
             self.public_url = url.strip().rstrip("/")
@@ -226,11 +261,24 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(200, state_manager.get_state())
             return
 
+        if path == "/api/qr":
+            self.handle_qr_image()
+            return
+
         super().do_GET()
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
+
+        if path == "/api/qr/upload":
+            self.handle_qr_upload()
+            return
+
+        content_type = self.headers.get("Content-Type", "")
+        if "multipart/form-data" in content_type.lower():
+            self.send_json(400, {"error": "Unknown multipart endpoint"})
+            return
 
         content_len = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_len).decode("utf-8") if content_len > 0 else "{}"
@@ -266,6 +314,11 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
             return
 
+        if path == "/api/qr/clear":
+            success, msg = state_manager.clear_custom_qr()
+            self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
+            return
+
         if path == "/api/fire":
             fired = data.get("fired", True)
             success, msg = state_manager.set_fired(fired)
@@ -284,6 +337,111 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         self.send_json(404, {"error": "Endpoint not found"})
+
+    def handle_qr_image(self):
+        """Serve the QR shown on the big screen: admin-uploaded image if set,
+        else a QR generated locally with segno (no external API calls)."""
+        custom = state_manager.custom_qr
+        if custom:
+            mime, data = custom
+            self.send_bytes(200, mime, data)
+            return
+
+        base = state_manager.public_url or f"http://{state_manager.local_ip}:{PORT}"
+        scan_url = base.rstrip("/") + "/scan.html"
+        try:
+            import segno
+            buf = io.BytesIO()
+            segno.make(scan_url, error="h").save(buf, kind="png", scale=10, border=2)
+            self.send_bytes(200, "image/png", buf.getvalue())
+        except Exception as e:
+            self.send_json(500, {"error": f"QR generation failed: {e}"})
+
+    def handle_qr_upload(self):
+        """Parse a multipart/form-data upload containing the custom QR image."""
+        content_type = self.headers.get("Content-Type", "")
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+        except ValueError:
+            length = 0
+        if length <= 0 or length > MAX_QR_SIZE + 64 * 1024:
+            self.send_json(400, {"error": "Missing or too-large upload body"})
+            return
+        body = self.rfile.read(length)
+
+        m = re.search(r'boundary="?([^";]+)"?', content_type)
+        if not m:
+            self.send_json(400, {"error": "No multipart boundary found"})
+            return
+
+        try:
+            field_name = None
+            filename = None
+            part_mime = None
+            payload = None
+            boundary = m.group(1).strip().encode("utf-8")
+            delim = b"--" + boundary
+            for chunk in body.split(delim):
+                chunk = chunk.strip(b"\r\n")
+                if not chunk or chunk == b"--":
+                    continue
+                header_blob, _, payload = chunk.partition(b"\r\n\r\n")
+                headers = header_blob.decode("utf-8", "replace")
+                nm = re.search(r'name="([^"]*)"', headers)
+                fm = re.search(r'filename="([^"]*)"', headers)
+                cm = re.search(r"Content-Type:\s*([^\r\n]+)", headers, re.I)
+                if nm:
+                    field_name = nm.group(1)
+                if fm:
+                    filename = fm.group(1)
+                if cm:
+                    part_mime = cm.group(1).strip()
+                if nm and nm.group(1) == "qr" and payload is not None:
+                    payload = payload.rstrip(b"\r\n")
+                    break
+            else:
+                payload = None
+        except Exception as e:
+            self.send_json(400, {"error": f"Bad multipart payload: {e}"})
+            return
+
+        if not payload:
+            self.send_json(400, {"error": "No file received (expected field 'qr')"})
+            return
+
+        mime = (part_mime or "").split(";")[0].strip().lower()
+        if mime not in ALLOWED_QR_TYPES:
+            # Fall back to sniffing from the filename/bytes
+            if filename and filename.lower().endswith(".svg"):
+                mime = "image/svg+xml"
+            elif payload[:8] == b"\x89PNG\r\n\x1a\n":
+                mime = "image/png"
+            elif payload[:3] == b"\xff\xd8\xff":
+                mime = "image/jpeg"
+            elif payload[:4] in (b"GIF8",):
+                mime = "image/gif"
+            elif payload[:4] == b"RIFF" and payload[8:12] == b"WEBP":
+                mime = "image/webp"
+            elif b"<svg" in payload[:512]:
+                mime = "image/svg+xml"
+            else:
+                self.send_json(400, {"error": f"Unsupported image type: {mime or 'unknown'}"})
+                return
+
+        if len(payload) > MAX_QR_SIZE:
+            self.send_json(400, {"error": "Image too large (max 5 MB)"})
+            return
+
+        success, msg = state_manager.set_custom_qr(mime, payload)
+        self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
+
+    def send_bytes(self, status, mime, data):
+        self.send_response(status)
+        self.send_header("Content-Type", mime)
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(data)
 
     def handle_sse(self):
         self.send_response(200)

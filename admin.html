@@ -271,6 +271,26 @@
           </div>
         </div>
 
+        <!-- Marquee Text Editor -->
+        <div class="p-3 rounded-xl border-2 border-foreground bg-secondary/50 space-y-3">
+          <div>
+            <h3 class="font-display text-lg">Marquee Text</h3>
+            <p class="font-hand text-xs text-muted-foreground">The two black scrolling strips on the big screen (above the page and above the footer)</p>
+          </div>
+          <div class="space-y-2">
+            <div>
+              <label class="font-hand text-xs text-muted-foreground block mb-1">Top strip (under the banner)</label>
+              <input id="input-marquee-top" type="text" maxlength="200" class="w-full rounded-md border-2 border-foreground bg-card px-3 py-2 font-hand text-foreground outline-none text-sm" placeholder="WELCOME TO USELESS PROJECTS 3.0 ✦ …">
+            </div>
+            <div>
+              <label class="font-hand text-xs text-muted-foreground block mb-1">Bottom strip (above the footer)</label>
+              <input id="input-marquee-bottom" type="text" maxlength="200" class="w-full rounded-md border-2 border-foreground bg-card px-3 py-2 font-hand text-foreground outline-none text-sm" placeholder="BUILT WITH ♥ AT SNMIMT ✦ …">
+            </div>
+            <button onclick="saveMarquee()" class="btn-ink text-xs px-4 py-1.5">Save Marquee Text</button>
+            <span id="marquee-status" class="font-hand text-xs text-muted-foreground ml-2"></span>
+          </div>
+        </div>
+
         <!-- Button Lock Gate -->
         <div class="flex items-center justify-between p-3 rounded-xl border-2 border-foreground bg-secondary/50">
           <div>
@@ -422,6 +442,11 @@
         refreshBrochure();
       });
 
+      evtSource.addEventListener('marquee', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.state) updateUI(data.state);
+      });
+
       evtSource.onerror = () => {
         statusEl.textContent = '○ Reconnecting...';
         statusEl.className = 'pill text-xs bg-yellow-100 text-yellow-800';
@@ -455,6 +480,12 @@
         refreshQrPreview();
       }
       currentState = state;
+
+      // Marquee inputs (don't clobber while typing)
+      const mt = document.getElementById('input-marquee-top');
+      const mb = document.getElementById('input-marquee-bottom');
+      if (mt && document.activeElement !== mt && mt.value !== (state.marqueeTop || '')) mt.value = state.marqueeTop || '';
+      if (mb && document.activeElement !== mb && mb.value !== (state.marqueeBottom || '')) mb.value = state.marqueeBottom || '';
 
       // Brochure list + lock buttons
       renderBrochureList(state.brochure || { names: [] });
@@ -651,6 +682,22 @@
     // --- Big Button Safety Lock ---
     async function setButtonLock(locked) {
       await fetch('/api/lock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ locked }) });
+    }
+
+    // --- Marquee editor ---
+    async function saveMarquee() {
+      const status = document.getElementById('marquee-status');
+      const res = await fetch('/api/marquee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          top: document.getElementById('input-marquee-top').value,
+          bottom: document.getElementById('input-marquee-bottom').value
+        })
+      });
+      const data = await res.json();
+      status.textContent = data.success ? '✓ saved — live on the big screen' : (data.message || 'failed');
+      setTimeout(() => { status.textContent = ''; }, 4000);
     }
 
     // API Calls

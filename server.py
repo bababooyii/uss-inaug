@@ -46,6 +46,8 @@ class StateManager:
         self.custom_qr = None  # (mime_type, bytes) — admin-uploaded QR image
         self.button_locked = False  # admin gate: big red button is dead while True
         self.brochure = []  # list of {mime, data, name} — brochure/menu slideshow images
+        self.marquee_top = "WELCOME TO USELESS PROJECTS 3.0 ✦ SCAN THE QR TO CHECK IN ✦ SNMIMT TINKERHUB"
+        self.marquee_bottom = "BUILT WITH ♥ AT SNMIMT ✦ USELESS PROJECTS 3.0 ✦ LET'S START THE CHAOS"
         self.local_ip = self._get_local_ip()
         self.default_names = [
             "aadhi", "nandana", "sreehari", "fathima", "anaswara",
@@ -84,6 +86,8 @@ class StateManager:
                     "count": len(self.brochure),
                     "names": [b["name"] for b in self.brochure],
                 },
+                "marqueeTop": self.marquee_top,
+                "marqueeBottom": self.marquee_bottom,
                 "localIp": self.local_ip,
                 "port": PORT
             }
@@ -200,6 +204,17 @@ class StateManager:
             self.brochure = []
         self.broadcast("brochure", {"count": 0})
         return True, "Brochure cleared"
+
+    def set_marquee(self, top, bottom):
+        top = str(top or "").strip()[:200]
+        bottom = str(bottom or "").strip()[:200]
+        with self.lock:
+            if top:
+                self.marquee_top = top
+            if bottom:
+                self.marquee_bottom = bottom
+        self.broadcast("marquee", {"marqueeTop": self.marquee_top, "marqueeBottom": self.marquee_bottom})
+        return True, "Marquee updated"
 
     def set_public_url(self, url):
         with self.lock:
@@ -347,6 +362,11 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
             name = data.get("name") or urllib.parse.parse_qs(parsed.query).get("name", [None])[0]
             success, msg, state = state_manager.scan(ticket, name)
             self.send_json(200 if success else 400, {"success": success, "message": msg, "state": state})
+            return
+
+        if path == "/api/marquee":
+            success, msg = state_manager.set_marquee(data.get("top"), data.get("bottom"))
+            self.send_json(200, {"success": success, "message": msg, "state": state_manager.get_state()})
             return
 
         if path == "/api/target":

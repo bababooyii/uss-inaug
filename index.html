@@ -71,6 +71,47 @@
       transition: opacity 420ms ease, transform 820ms cubic-bezier(.16,.9,.28,1);
       transform-origin: 500px 500px;
     }
+    .marquee-strip {
+      overflow: hidden;
+      white-space: nowrap;
+      background: var(--foreground, #1B1B1B);
+      color: var(--background, #FAF9F6);
+    }
+    .marquee-track {
+      display: inline-flex;
+      animation: marquee-scroll 24s linear infinite;
+      will-change: transform;
+    }
+    .marquee-track span {
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 6px 2.5rem 6px 2.5rem;
+    }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .float-name {
+      position: fixed;
+      bottom: -70px;
+      z-index: 40;
+      pointer-events: none;
+      font-family: 'Patrick Hand', cursive;
+      font-size: 1.35rem;
+      background: var(--card, #FFFFFF);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 8px 20px;
+      box-shadow: 3px 4px 0 0 var(--foreground, #1B1B1B);
+      animation: float-name-rise 4.5s ease-out forwards;
+    }
+    @keyframes float-name-rise {
+      0%   { transform: translateY(0) rotate(-2deg); opacity: 0; }
+      8%   { opacity: 1; }
+      75%  { opacity: 1; }
+      100% { transform: translateY(-88vh) rotate(3deg); opacity: 0; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -80,6 +121,11 @@
     <img src="__l5e/assets-v1/634a551f-8685-4759-b46e-fdbe6a390438/tinkerhub-snmimt-banner.png" alt="TinkerHub SNMIMT" class="h-14 sm:h-18 w-auto object-contain">
     <div class="w-24"></div>
   </header>
+
+  <!-- Top Marquee Strip -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track" id="marquee-top-track"><span id="marquee-top-text">WELCOME TO USELESS PROJECTS 3.0 ✦ SCAN THE QR TO CHECK IN ✦ SNMIMT TINKERHUB</span><span id="marquee-top-text-dup">WELCOME TO USELESS PROJECTS 3.0 ✦ SCAN THE QR TO CHECK IN ✦ SNMIMT TINKERHUB</span></div>
+  </div>
 
   <!-- Main Display Stage -->
   <main class="mx-auto grid max-w-[1400px] w-full gap-8 px-6 py-6 lg:grid-cols-[380px_1fr] items-center flex-1">
@@ -127,20 +173,15 @@
     </section>
 
     <!-- Right Column: 24 Reishi Roots & Big Red Button Stage -->
-    <section class="panel relative flex min-h-[72vh] flex-col items-center justify-center overflow-hidden p-6 gap-4 lg:flex-row lg:items-stretch lg:gap-6">
+    <section class="panel relative flex min-h-[72vh] flex-row items-stretch justify-center gap-4 p-6 lg:gap-6">
       <!-- Status Top Badges -->
-      <div class="relative z-10 -mb-2 flex flex-wrap justify-center gap-2 lg:absolute lg:left-6 lg:top-6 lg:-mb-0">
+      <div class="absolute left-6 top-6 flex flex-wrap gap-2 z-10">
         <span id="roots-badge" class="pill font-display">reishi: 0/24 roots</span>
         <span id="lock-badge" class="pill font-display bg-yellow-100 text-yellow-900" style="display:none">🔒 LOCKED</span>
       </div>
-      <!-- Center Reishi Roots SVG & Button -->
-      <div class="relative grid aspect-square w-full max-w-[620px] flex-1 place-items-center">
-      <div class="absolute right-2 top-2 flex gap-2">
-        <span class="h-6 w-6 animate-float-soft rounded-full border-4 border-tetris-magenta bg-tetris-cyan"></span>
-        <span class="h-6 w-6 animate-float-soft rounded-full border-4 border-tetris-red bg-tetris-yellow"></span>
-      </div>
 
-        <!-- Reishi SVG Canvas -->
+      <!-- Center Reishi Roots SVG & Button -->
+      <div class="relative grid aspect-square w-full max-w-[620px] min-w-0 flex-1 place-items-center">
         <div class="absolute inset-0 pointer-events-none">
           <svg id="reishi-svg" viewBox="0 0 1000 1000" class="h-full w-full overflow-visible" aria-hidden="true">
             <defs>
@@ -200,7 +241,7 @@
       </div>
 
       <!-- Brochure / Menu Slideshow -->
-      <div id="brochure-panel" class="panel hidden w-full max-w-[300px] min-h-[420px] shrink-0 p-3 lg:w-[280px] lg:max-w-none lg:min-h-0 lg:self-stretch flex flex-col items-center justify-center gap-3">
+      <div id="brochure-panel" class="panel hidden w-[240px] sm:w-[280px] min-h-[420px] shrink-0 self-stretch flex flex-col items-center justify-center gap-3">
         <span class="pill font-display text-xs bg-tetris-cyan">📜 Menu / Brochure</span>
         <div id="brochure-stage" class="flex-1 w-full flex items-center justify-center overflow-hidden rounded-xl border-2 border-foreground bg-card min-h-[320px]"></div>
         <p id="brochure-caption" class="font-hand text-xs text-muted-foreground text-center"></p>
@@ -209,6 +250,14 @@
   </main>
 
   <!-- Celebration Modal (GPU Canvas Particles - Zero Lag) -->
+  <!-- Floating check-in names overlay -->
+  <div id="float-names-layer" class="pointer-events-none fixed inset-0 z-40"></div>
+
+  <!-- Bottom Marquee Strip -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track" id="marquee-bottom-track"><span id="marquee-bottom-text">BUILT WITH ♥ AT SNMIMT ✦ USELESS PROJECTS 3.0 ✦ LET'S START THE CHAOS</span><span id="marquee-bottom-text-dup">BUILT WITH ♥ AT SNMIMT ✦ USELESS PROJECTS 3.0 ✦ LET'S START THE CHAOS</span></div>
+  </div>
+
   <!-- Secret Admin Gate (footer heart × 5) -->
   <div id="secret-admin-overlay" class="fixed inset-0 z-[60] hidden place-items-center bg-background/95 backdrop-blur-md">
     <div class="panel p-8 w-full max-w-sm text-center space-y-4">
@@ -412,6 +461,37 @@
       }
     }
 
+    // ----- Marquee strips (editable from admin) -----
+    function updateMarquees(s) {
+      if (!s) return;
+      const pairs = [
+        ['marquee-top-text', 'marquee-top-text-dup', s.marqueeTop],
+        ['marquee-bottom-text', 'marquee-bottom-text-dup', s.marqueeBottom]
+      ];
+      for (const [id, dupId, text] of pairs) {
+        if (!text) continue;
+        const el = document.getElementById(id);
+        if (el && el.textContent !== text) {
+          el.textContent = text;
+          const dup = document.getElementById(dupId);
+          if (dup) dup.textContent = text;
+        }
+      }
+    }
+
+    // ----- Floating check-in names -----
+    function showFloatingName(name) {
+      if (!name) return;
+      const layer = document.getElementById('float-names-layer');
+      if (!layer) return;
+      const el = document.createElement('div');
+      el.className = 'float-name';
+      el.textContent = `🎉 ${name} checked in!`;
+      el.style.left = (10 + Math.random() * 65) + 'vw';
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 4800);
+    }
+
     // ----- Brochure / Menu Slideshow (right of the button) -----
     let brochureStamp = Date.now();
     let brochureIdx = 0;
@@ -491,6 +571,9 @@
           rootEl.style.transform = lit ? 'scale(1)' : 'scale(0.35)';
         }
       }
+
+      // Update marquee texts
+      updateMarquees(s);
 
       // Update lock badge
       const lockBadge = document.getElementById('lock-badge');
@@ -579,7 +662,11 @@
       };
 
       evt.addEventListener('init', e => updateStateUI(JSON.parse(e.data).state));
-      evt.addEventListener('scan', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('scan', e => {
+        const data = JSON.parse(e.data);
+        updateStateUI(data.state);
+        if (data.payload && data.payload.name) showFloatingName(data.payload.name);
+      });
       evt.addEventListener('target', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('pause', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('fire', e => updateStateUI(JSON.parse(e.data).state));
@@ -587,6 +674,7 @@
       evt.addEventListener('delete', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('lock', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('brochure', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('marquee', e => updateStateUI(JSON.parse(e.data).state));
 
       evt.onerror = () => {
         ind.textContent = '○ Reconnecting...';

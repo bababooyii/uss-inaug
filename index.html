@@ -656,6 +656,11 @@
       };
     }
 
+    // Button Enter key
+    document.getElementById('inauguration-btn').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('inauguration-btn').click();
+    });
+
     // Button Click
     document.getElementById('inauguration-btn').addEventListener('click', async () => {
       if (state.fired) {

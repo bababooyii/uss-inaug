@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🎉 IT'S LIVE — Useless Projects 3.0</title>
+  <link rel="stylesheet" href="assets/styles-Cc3jfXhB.css">
+  <link rel="stylesheet" href="_external/fonts.googleapis.com/css2.family_Fredoka_wght_500_600_700_family_Patrick_Hand_display_swap.css">
+  <style>
+    body {
+      background: var(--background, #FAF9F6);
+      color: var(--foreground, #1B1B1B);
+      font-family: 'Fredoka', -apple-system, sans-serif;
+      overflow: hidden;
+    }
+    .font-hand { font-family: 'Patrick Hand', cursive; }
+    .font-display { font-family: 'Fredoka', sans-serif; font-weight: 700; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px; padding: 4px 14px;
+      font-size: 0.9rem; font-weight: 600;
+      background: var(--secondary, #F4F2EB);
+    }
+    @keyframes stamp-in {
+      0% { transform: scale(0.6); opacity: 0; }
+      60% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .stamp-in { animation: stamp-in 0.6s ease-out; }
+    @keyframes float-up {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .floaty { animation: float-up 3s ease-in-out infinite; }
+    @keyframes glow-pulse {
+      0%, 100% { text-shadow: 0 0 0 transparent; }
+      50% { text-shadow: 0 0 30px rgba(254, 123, 2, 0.45); }
+    }
+    .glow { animation: glow-pulse 2.2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center text-center px-6">
+  <canvas id="confetti-canvas" class="pointer-events-none fixed inset-0 h-full w-full"></canvas>
+
+  <div class="relative z-10 flex max-w-3xl flex-col items-center stamp-in">
+    <img src="__l5e/assets-v1/b3f5291b-4d5e-4635-a21e-c1beb140f910/useless-projects-3.png"
+         alt="Useless Projects 3.0"
+         class="w-[min(520px,88vw)] drop-shadow-[0_12px_0_rgba(0,0,0,0.12)] floaty">
+
+    <h1 class="mt-8 font-display text-5xl sm:text-7xl tracking-tight glow">IT'S LIVE!</h1>
+    <p class="mt-3 font-display text-2xl sm:text-3xl text-tetris-orange uppercase tracking-wider">Let's start the chaos!</p>
+
+    <div class="mt-6 space-y-1 font-hand text-xl text-muted-foreground">
+      <p><span id="maker-count" class="font-display text-2xl text-foreground">…</span> makers scanned in. Pointless building activated.</p>
+      <p class="text-base">SNMIMT TinkerHub × Useless Projects 3.0</p>
+    </div>
+
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <span id="pill-status" class="pill font-display text-sm bg-green-100 text-green-800">● live — console is watching</span>
+      <span class="pill font-hand text-sm">returning to console shortly…</span>
+    </div>
+  </div>
+
+  <script>
+    // ----- Live count via SSE + full state polling fallback -----
+    (function () {
+      const el = document.getElementById('maker-count');
+      const pill = document.getElementById('pill-status');
+      function applyCount(n) { el.textContent = (n && n > 0) ? n : el.textContent; }
+
+      try {
+        const evt = new EventSource('/api/events');
+        evt.addEventListener('init', e => {
+          const s = JSON.parse(e.data).state;
+          if (!s.fired) { location.href = '/'; return; }   // admin reset while we're here
+          applyCount(s.count);
+        });
+        evt.addEventListener('reset', () => { location.href = '/'; });  // reset → back to console
+        evt.addEventListener('scan', e => applyCount(JSON.parse(e.data).state.count));
+      } catch (_) { /* SSE failed; poll instead */ }
+
+      setInterval(async () => {
+        try {
+          const s = await (await fetch('/api/state')).json();
+          if (!s.fired) { location.href = '/'; return; }
+          applyCount(s.count);
+        } catch (_) {}
+      }, 5000);
+    })();
+
+    // ----- Confetti (60fps canvas engine) -----
+    (function () {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+      resize(); addEventListener('resize', resize);
+
+      const colors = ["#FE7B02", "#FE3F21", "#F858BC", "#575ECF", "#06D6A0", "#FFD166", "#118AB2"];
+      const particles = [];
+      for (let i = 0; i < 160; i++) {
+        particles.push({
+          x: canvas.width * 0.5 + (Math.random() - 0.5) * 260,
+          y: canvas.height * 0.5 + (Math.random() - 0.5) * 120,
+          vx: (Math.random() - 0.5) * 22,
+          vy: -Math.random() * 19 - 7,
+          size: Math.random() * 9 + 5,
+          color: colors[(Math.random() * colors.length) | 0],
+          rotation: Math.random() * 360,
+          rSpeed: (Math.random() - 0.5) * 12,
+          gravity: 0.35,
+          drag: 0.985
+        });
+      }
+      (function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const p of particles) {
+          p.vx *= p.drag; p.vy += p.gravity;
+          p.x += p.vx; p.y += p.vy; p.rotation += p.rSpeed;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+          if (p.y > canvas.height + 20) {
+            p.y = -20; p.x = Math.random() * canvas.width;
+            p.vy = Math.random() * 3 + 2;
+            p.vx = (Math.random() - 0.5) * 2;
+          }
+        }
+        requestAnimationFrame(loop);
+      })();
+    })();
+
+    // Auto-return to console after 45s if nothing happens
+    setTimeout(() => { location.href = '/'; }, 45000);
+  </script>
+</body>
+</html>

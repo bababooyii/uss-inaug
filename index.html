@@ -71,6 +71,16 @@
       transition: opacity 420ms ease, transform 820ms cubic-bezier(.16,.9,.28,1);
       transform-origin: 500px 500px;
     }
+    /* Desktop-first projector layout: QR | Button | Brochure columns */
+    .desk-stage { flex-direction: column; }
+    @media (min-width: 700px) {
+      .desk-stage { flex-direction: row; align-items: stretch; }
+      .desk-stage > .qr-col { width: 360px; flex: 0 0 360px; align-self: center; }
+      .desk-stage > .stage-col { flex: 1 1 auto; min-width: 0; }
+      .desk-stage > .brochure-col { width: 280px; flex: 0 0 280px; }
+    }
+    #brochure-panel { display: flex; }
+    #brochure-panel.hidden { display: none; }
     .marquee-strip {
       overflow: hidden;
       white-space: nowrap;
@@ -128,10 +138,10 @@
   </div>
 
   <!-- Main Display Stage -->
-  <main class="mx-auto grid max-w-[1400px] w-full gap-8 px-6 py-6 lg:grid-cols-[380px_1fr] items-center flex-1">
+  <main class="mx-auto flex w-full max-w-[1500px] flex-1 flex-col gap-6 px-6 py-6 desk-stage">
     
     <!-- Left Column: Scan QR Code & Live Registration Info -->
-    <section class="space-y-5">
+    <section class="qr-col space-y-5">
       <div class="panel p-6 text-center space-y-4">
         <div class="flex items-center justify-between">
           <span class="pill bg-tetris-yellow text-foreground text-xs">📲 Maker Check-in</span>
@@ -173,7 +183,7 @@
     </section>
 
     <!-- Right Column: 24 Reishi Roots & Big Red Button Stage -->
-    <section class="panel relative flex min-h-[72vh] flex-row items-stretch justify-center gap-4 p-6 lg:gap-6">
+    <section class="panel stage-col relative flex min-h-[72vh] items-center justify-center p-6">
       <!-- Status Top Badges -->
       <div class="absolute left-6 top-6 flex flex-wrap gap-2 z-10">
         <span id="roots-badge" class="pill font-display">reishi: 0/24 roots</span>
@@ -183,7 +193,7 @@
       <!-- Center Reishi Roots SVG & Button -->
       <div class="relative grid aspect-square w-full max-w-[620px] min-w-0 flex-1 place-items-center">
         <div class="absolute inset-0 pointer-events-none">
-          <svg id="reishi-svg" viewBox="0 0 1000 1000" class="h-full w-full overflow-visible" aria-hidden="true">
+          <svg id="reishi-svg" viewBox="0 0 1000 1000" class="h-full w-full" aria-hidden="true">
             <defs>
               <filter id="reishi-halo" x="-60%" y="-60%" width="220%" height="220%">
                 <feGaussianBlur stdDeviation="12" result="b"></feGaussianBlur>
@@ -240,13 +250,14 @@
         </div>
       </div>
 
-      <!-- Brochure / Menu Slideshow -->
-      <div id="brochure-panel" class="panel hidden w-[240px] sm:w-[280px] min-h-[420px] shrink-0 self-stretch flex flex-col items-center justify-center gap-3">
-        <span class="pill font-display text-xs bg-tetris-cyan">📜 Menu / Brochure</span>
-        <div id="brochure-stage" class="flex-1 w-full flex items-center justify-center overflow-hidden rounded-xl border-2 border-foreground bg-card min-h-[320px]"></div>
-        <p id="brochure-caption" class="font-hand text-xs text-muted-foreground text-center"></p>
-      </div>
     </section>
+
+    <!-- Brochure / Menu Slideshow — independent right column (like the QR column) -->
+    <aside id="brochure-panel" class="panel brochure-col hidden min-h-[420px] flex-col items-center justify-center gap-3">
+      <span class="pill font-display text-xs bg-tetris-cyan">📜 Menu / Brochure</span>
+      <div id="brochure-stage" class="flex-1 w-full flex items-center justify-center overflow-hidden rounded-xl border-2 border-foreground bg-card min-h-[320px]"></div>
+      <p id="brochure-caption" class="font-hand text-xs text-muted-foreground text-center"></p>
+    </aside>
   </main>
 
   <!-- Celebration Modal (GPU Canvas Particles - Zero Lag) -->
@@ -273,26 +284,6 @@
     </div>
   </div>
 
-  <div id="celebration-modal" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center overflow-hidden bg-background/95 backdrop-blur-md px-6 text-center animate-stamp-in">
-    <canvas id="confetti-canvas" class="pointer-events-none absolute inset-0 h-full w-full"></canvas>
-    
-    <div class="relative z-10 flex max-w-2xl flex-col items-center">
-      <img src="__l5e/assets-v1/b3f5291b-4d5e-4635-a21e-c1beb140f910/useless-projects-3.png" alt="Useless Projects 3.0" class="w-[min(480px,85vw)] drop-shadow-[0_12px_0_rgba(0,0,0,0.12)]">
-      
-      <h1 class="mt-8 font-display text-4xl sm:text-6xl text-foreground tracking-tight">WELCOME TO USELESS PROJECTS 3.0!</h1>
-      <p class="mt-4 font-display text-2xl sm:text-3xl text-tetris-orange uppercase tracking-wider">LET'S START THE CHAOS!</p>
-      
-      <div class="mt-6 space-y-2 font-hand text-xl text-muted-foreground">
-        <p><span id="modal-maker-count" class="font-bold text-foreground font-display text-2xl">32</span> makers scanned in. Pointless building activated.</p>
-        <p class="text-base">SNMIMT TinkerHub × Useless Projects 3.0</p>
-      </div>
-
-      <button id="modal-close-btn" type="button" class="btn-ink mt-8 px-8 py-3 text-lg cursor-pointer hover:scale-105 active:scale-95 transition-transform">
-        Back to Console
-      </button>
-    </div>
-  </div>
-
   <!-- Footer -->
   <footer class="px-6 py-4 text-center font-hand text-sm text-muted-foreground border-t border-border/40">
     built with <span id="secret-heart" class="text-btn-red cursor-pointer select-none" title="">♥</span> for the snmimt tinkerhub campus community
@@ -303,7 +294,7 @@
     const TOTAL_ROOTS = 24;
     const ROOT_CX = 500;
     const ROOT_RADIUS = 196;
-    const ROOT_MAX_LEN = 900;
+    const ROOT_MAX_LEN = 680;
 
     function pseudoRandom(seed) {
       let s = seed;
@@ -521,7 +512,7 @@
 
       function show() {
         const i = brochureIdx % n;
-        stage.innerHTML = `<img src="/api/brochure?i=${i}&t=${brochureStamp}" class="max-h-[380px] max-w-full object-contain rounded-lg" alt="Brochure page ${i + 1}">`;
+        stage.innerHTML = `<img src="/api/brochure?i=${i}&t=${brochureStamp}" class="max-h-full max-w-full object-contain rounded-lg" alt="Brochure page ${i + 1}">`;
         caption.textContent = n > 1 ? `page ${i + 1} / ${n}` : (info.names && info.names[i] ? info.names[i] : '');
         brochureIdx = (brochureIdx + 1) % n;
       }
@@ -595,7 +586,10 @@
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-primary-foreground";
         caption.textContent = "reishi released. useless projects 3.0 is live <3";
         shockwave.classList.add('hidden');
-        showCelebrationModal(count);
+        // Celebration lives on its own page now
+        if (location.pathname !== '/celebration.html') {
+          window.location.href = '/celebration.html';
+        }
       } else if (s.buttonLocked) {
         btn.disabled = true;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";
@@ -604,7 +598,6 @@
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-foreground/40";
         caption.textContent = "🔒 button is locked by the admin";
         shockwave.classList.add('hidden');
-        hideCelebrationModal();
       } else if (s.paused) {
         btn.disabled = true;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";
@@ -612,7 +605,6 @@
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-foreground/40";
         caption.textContent = "system is paused by admin";
         shockwave.classList.add('hidden');
-        hideCelebrationModal();
       } else if (isArmed) {
         btn.disabled = false;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-pointer bg-btn-red animate-btn-breathe active:translate-y-2 active:shadow-[0_2px_0_0_var(--color-btn-red-dark)]";
@@ -621,7 +613,6 @@
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-primary-foreground";
         caption.textContent = "all roots are lit — the button is hot. press it.";
         shockwave.classList.remove('hidden');
-        hideCelebrationModal();
       } else {
         btn.disabled = true;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";
@@ -630,7 +621,6 @@
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-foreground/40";
         caption.textContent = `button stays cold until every root drinks reishi (${count}/${target})`;
         shockwave.classList.add('hidden');
-        hideCelebrationModal();
       }
 
       // Update Ticker
@@ -695,85 +685,8 @@
       }
     });
 
-    // High Performance 60FPS Confetti Canvas Engine
-    let confettiAnimationId = null;
-    function startConfetti() {
-      const canvas = document.getElementById('confetti-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
-      const colors = ["#FE7B02", "#FE3F21", "#F858BC", "#575ECF", "#06D6A0", "#FFD166", "#118AB2"];
-      const particles = [];
-      for (let i = 0; i < 110; i++) {
-        particles.push({
-          x: canvas.width * 0.5 + (Math.random() - 0.5) * 200,
-          y: canvas.height * 0.5 + (Math.random() - 0.5) * 100,
-          vx: (Math.random() - 0.5) * 20,
-          vy: -Math.random() * 18 - 6,
-          size: Math.random() * 9 + 5,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          rotation: Math.random() * 360,
-          rSpeed: (Math.random() - 0.5) * 12,
-          gravity: 0.35,
-          drag: 0.985
-        });
-      }
-
-      function loop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i < particles.length; i++) {
-          const p = particles[i];
-          p.vx *= p.drag;
-          p.vy += p.gravity;
-          p.x += p.vx;
-          p.y += p.vy;
-          p.rotation += p.rSpeed;
-
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate((p.rotation * Math.PI) / 180);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
-          ctx.restore();
-
-          if (p.y > canvas.height + 20) {
-            p.y = -20;
-            p.x = Math.random() * canvas.width;
-            p.vy = Math.random() * 3 + 2;
-            p.vx = (Math.random() - 0.5) * 2;
-          }
-        }
-        confettiAnimationId = requestAnimationFrame(loop);
-      }
-      loop();
-    }
-
-    function stopConfetti() {
-      if (confettiAnimationId) {
-        cancelAnimationFrame(confettiAnimationId);
-        confettiAnimationId = null;
-      }
-    }
-
-    function showCelebrationModal(count) {
-      const modal = document.getElementById('celebration-modal');
-      document.getElementById('modal-maker-count').textContent = count;
-      modal.classList.remove('hidden');
-      if (!confettiAnimationId) startConfetti();
-    }
-
-    function hideCelebrationModal() {
-      const modal = document.getElementById('celebration-modal');
-      modal.classList.add('hidden');
-      stopConfetti();
-    }
-
-    document.getElementById('modal-close-btn').addEventListener('click', async () => {
-      hideCelebrationModal();
-      await fetch('/api/reset', { method: 'POST' });
-    });
+    // Celebration moved to its own page (celebration.html) — shown on fire, no modal here.
+    // Reset now happens from the admin panel only.
 
     // Keyboard trigger (SPACE or S)
     window.addEventListener('keydown', async (e) => {

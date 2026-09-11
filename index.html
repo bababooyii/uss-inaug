@@ -347,15 +347,73 @@
           </svg>
         </div>
 
-        <!-- Upgrade Central Core Button -->
+        <!-- Spider Core Button -->
         <div class="relative z-10 flex flex-col items-center">
           <div class="relative">
             <!-- Shockwave ripple when armed -->
-            <span id="btn-shockwave" class="hidden absolute inset-0 rounded-full bg-[#00ff66]/30" style="animation: shockwave 2.2s ease-out infinite"></span>
-            
-            <div class="relative grid h-56 w-56 place-items-center rounded-full border-4 border-[#00ff66] bg-[#070d09] shadow-[0_0_30px_rgba(0,255,102,0.35),inset_0_0_20px_rgba(0,255,102,0.2)]">
-              <button id="inauguration-btn" type="button" disabled aria-label="Inauguration button" class="group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00ff66]/40 transition-all duration-200 cursor-not-allowed bg-[#00ff66]/15" style="box-shadow: 0 8px 0 0 rgba(0, 77, 26, 0.4);">
-                <span id="btn-label" class="font-display text-center text-lg leading-tight tracking-widest text-[#00ff66]/50">UPGRADE</span>
+            <span id="btn-shockwave" class="hidden absolute inset-0 rounded-full" style="background: radial-gradient(circle, rgba(180,10,20,0.4) 0%, transparent 70%); animation: shockwave 2.2s ease-out infinite"></span>
+
+            <!-- Outer bezel ring — dark matte with red accent rim -->
+            <div class="relative grid h-56 w-56 place-items-center rounded-full" style="background: radial-gradient(circle at 40% 35%, #141414, #0a0a0a); border: 3.5px solid #1c0a0a; box-shadow: 0 0 0 1.5px #2a0808, 0 0 30px rgba(150,10,10,0.2), 0 8px 24px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.85);">
+
+              <!-- Inner button — the actual clickable target -->
+              <button id="inauguration-btn" type="button" disabled aria-label="Inauguration button"
+                class="group relative grid h-40 w-40 place-items-center rounded-full transition-all duration-200 cursor-not-allowed"
+                style="background: radial-gradient(circle at 42% 38%, #180404, #0c0202); border: 3px solid #2a0808; box-shadow: 0 6px 0 0 #180303, inset 0 0 14px rgba(0,0,0,0.9);">
+
+                <!-- Spider Emblem SVG — clean geometric Spider-Man logo -->
+                <svg id="spider-emblem" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"
+                  style="width: 110px; height: 110px; display: block; transition: filter 0.3s ease;"
+                  aria-hidden="true">
+                  <defs>
+                    <filter id="spider-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.7"/>
+                    </filter>
+                    <filter id="spider-armed-glow" x="-40%" y="-40%" width="180%" height="180%">
+                      <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ff1a2e" flood-opacity="0.85"/>
+                    </filter>
+                    <radialGradient id="spider-body-grad" cx="50%" cy="45%" r="55%">
+                      <stop offset="0%" stop-color="#e8172e"/>
+                      <stop offset="100%" stop-color="#9a0f1e"/>
+                    </radialGradient>
+                  </defs>
+
+                  <!-- Spider body group -->
+                  <g filter="url(#spider-shadow)">
+
+                    <!-- HEAD — pointed upward -->
+                    <path d="M100 68 L88 80 L86 90 L100 96 L114 90 L112 80 Z" fill="url(#spider-body-grad)"/>
+
+                    <!-- CEPHALOTHORAX — wider midsection -->
+                    <path d="M84 96 L100 92 L116 96 L116 110 L100 114 L84 110 Z" fill="url(#spider-body-grad)"/>
+
+                    <!-- ABDOMEN — larger teardrop -->
+                    <path d="M100 114 C82 114 72 126 72 140 C72 158 84 170 100 172 C116 170 128 158 128 140 C128 126 118 114 100 114 Z" fill="url(#spider-body-grad)"/>
+
+                    <!-- LEFT LEGS -->
+                    <path d="M88 88 L68 72 L44 52 L38 40" stroke="#c41425" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                    <path d="M84 96 L56 88 L30 78 L20 68" stroke="#c41425" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                    <path d="M84 106 L54 114 L28 122 L18 130" stroke="#c41425" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                    <path d="M88 114 L64 132 L44 154 L38 166" stroke="#c41425" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+                    <!-- RIGHT LEGS — mirror of left -->
+                    <path d="M112 88 L132 72 L156 52 L162 40" stroke="#c41425" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                    <path d="M116 96 L144 88 L170 78 L180 68" stroke="#c41425" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                    <path d="M116 106 L146 114 L172 122 L182 130" stroke="#c41425" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                    <path d="M112 114 L136 132 L156 154 L162 166" stroke="#c41425" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                  </g>
+
+                  <!-- SPINNERET NOZZLE — web origin point -->
+                  <circle id="spinneret-dot" cx="100" cy="140" r="4.5" fill="#ffffff" opacity="0.95" filter="url(#spider-shadow)"/>
+                  <circle cx="100" cy="140" r="2" fill="#ffe0e0" opacity="1"/>
+
+                  <!-- Eye highlights — angular white slits -->
+                  <path d="M92 82 L88 86 L95 88 L96 83 Z" fill="#ffffff" opacity="0.92"/>
+                  <path d="M108 82 L112 86 L105 88 L104 83 Z" fill="#ffffff" opacity="0.92"/>
+                </svg>
+
+                <!-- Hidden label used for armed state text (invisible by default) -->
+                <span id="btn-label" class="sr-only">INITIATE</span>
               </button>
             </div>
           </div>
@@ -684,18 +742,245 @@
       }
     }
 
-    // ----- Floating check-in names -----
+    // ===== SPIDER WEB-SHOOTER ANIMATION ENGINE =====
+    // Queue system ensures animations don't pile up chaotically
+    const webQueue = [];
+    let webBusy = false;
+
     function showFloatingName(name) {
       if (!name) return;
-      const layer = document.getElementById('float-names-layer');
-      if (!layer) return;
-      const el = document.createElement('div');
-      el.className = 'float-name';
-      el.textContent = `🎉 ${name} checked in!`;
-      el.style.left = (10 + Math.random() * 65) + 'vw';
-      layer.appendChild(el);
-      setTimeout(() => el.remove(), 4800);
+      webQueue.push(name);
+      if (!webBusy) _processWebQueue();
     }
+
+    function _processWebQueue() {
+      if (!webQueue.length) { webBusy = false; return; }
+      webBusy = true;
+      const name = webQueue.shift();
+      _fireWebAnimation(name, _processWebQueue);
+    }
+
+    function _getSpinneretOrigin() {
+      // Find the spinneret dot's screen position
+      // The spinneret SVG is inside #inauguration-btn
+      const btn = document.getElementById('inauguration-btn');
+      if (!btn) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      const r = btn.getBoundingClientRect();
+      // Spinneret dot is at cx=100,cy=140 in a 200x200 SVG displayed at 110x110px
+      // offset within SVG: (100/200)*110 = 55px from left, (140/200)*110 = 77px from top
+      const svgOffX = 55, svgOffY = 77;
+      // The SVG is centered inside the button (grid place-items-center)
+      const btnW = r.width, btnH = r.height;
+      const svgLeft = (btnW - 110) / 2;
+      const svgTop  = (btnH - 110) / 2;
+      return {
+        x: r.left + svgLeft + svgOffX,
+        y: r.top  + svgTop  + svgOffY
+      };
+    }
+
+    function _fireWebAnimation(name, onComplete) {
+      const layer = document.getElementById('float-names-layer');
+      if (!layer) { onComplete(); return; }
+
+      // --- 1. Spawn name badge at a random position ---
+      const badge = document.createElement('div');
+      badge.textContent = name;
+      Object.assign(badge.style, {
+        position: 'absolute',
+        fontFamily: "'Fredoka', sans-serif",
+        fontSize: '1.05rem',
+        fontWeight: '700',
+        color: '#fff',
+        letterSpacing: '0.06em',
+        background: 'linear-gradient(145deg, rgba(18,18,18,0.95), rgba(40,6,6,0.92))',
+        border: '1.5px solid rgba(200,25,35,0.5)',
+        borderRadius: '6px',
+        padding: '7px 16px',
+        whiteSpace: 'nowrap',
+        boxShadow: '0 4px 18px rgba(0,0,0,0.7), 0 0 8px rgba(200,25,35,0.25)',
+        pointerEvents: 'none',
+        zIndex: '50',
+        userSelect: 'none',
+        transition: 'none',
+        willChange: 'transform, opacity',
+        opacity: '0',
+        transform: 'scale(1)',
+      });
+
+      // Place badge avoiding button center area
+      const margin = 80;
+      const bx = margin + Math.random() * (window.innerWidth  - margin * 2 - 180);
+      const by = margin + Math.random() * (window.innerHeight - margin * 2 - 50);
+      badge.style.left = bx + 'px';
+      badge.style.top  = by + 'px';
+      layer.appendChild(badge);
+
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const badgeRect = badge.getBoundingClientRect();
+        const badgeCX = badgeRect.left + badgeRect.width  / 2;
+        const badgeCY = badgeRect.top  + badgeRect.height / 2;
+        const origin = _getSpinneretOrigin();
+
+        // Fade badge in
+        badge.style.transition = 'opacity 120ms ease-out';
+        badge.style.opacity = '1';
+
+        // --- 2. Create SVG overlay for web strands ---
+        const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        Object.assign(overlay.style, {
+          position: 'fixed', inset: '0', width: '100vw', height: '100vh',
+          pointerEvents: 'none', zIndex: '48', overflow: 'visible',
+        });
+        overlay.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        document.body.appendChild(overlay);
+
+        // Primary strand + two secondary strands for realism
+        const strands = [];
+        const strandConfigs = [
+          { stroke: '#e0e0e0', width: 1.4, opacity: 0.9, dash: '' },
+          { stroke: '#b8b8b8', width: 0.7, opacity: 0.55, dash: '3 2.5' },
+          { stroke: '#cccccc', width: 0.5, opacity: 0.35, dash: '5 4' },
+        ];
+        for (const cfg of strandConfigs) {
+          const s = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          s.setAttribute('fill', 'none');
+          s.setAttribute('stroke', cfg.stroke);
+          s.setAttribute('stroke-width', cfg.width);
+          s.setAttribute('stroke-linecap', 'round');
+          s.setAttribute('opacity', cfg.opacity);
+          if (cfg.dash) s.setAttribute('stroke-dasharray', cfg.dash);
+          overlay.appendChild(s);
+          strands.push(s);
+        }
+
+        // Web splat at badge center
+        const splat = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        splat.setAttribute('opacity', '0');
+        for (let a = 0; a < 8; a++) {
+          const angle = (a / 8) * Math.PI * 2;
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', badgeCX + Math.cos(angle) * 4);
+          line.setAttribute('y1', badgeCY + Math.sin(angle) * 4);
+          line.setAttribute('x2', badgeCX + Math.cos(angle) * 18);
+          line.setAttribute('y2', badgeCY + Math.sin(angle) * 18);
+          line.setAttribute('stroke', '#ddd');
+          line.setAttribute('stroke-width', '0.7');
+          splat.appendChild(line);
+        }
+        for (let ri = 1; ri <= 2; ri++) {
+          const arc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          arc.setAttribute('cx', badgeCX);
+          arc.setAttribute('cy', badgeCY);
+          arc.setAttribute('r', ri * 8);
+          arc.setAttribute('fill', 'none');
+          arc.setAttribute('stroke', '#bbb');
+          arc.setAttribute('stroke-width', '0.5');
+          arc.setAttribute('stroke-dasharray', `${ri * 3} ${ri * 2}`);
+          splat.appendChild(arc);
+        }
+        overlay.appendChild(splat);
+
+        // Control point offsets for arc variation
+        const midX = (origin.x + badgeCX) / 2 + (Math.random() - 0.5) * 50;
+        const midY = (origin.y + badgeCY) / 2 - 35;
+
+        function setStrandPath(t) {
+          const ex = origin.x + (badgeCX - origin.x) * t;
+          const ey = origin.y + (badgeCY - origin.y) * t;
+          const cx1 = origin.x + (midX - origin.x) * t;
+          const cy1 = origin.y + (midY - origin.y) * t;
+          const d = `M ${origin.x} ${origin.y} Q ${cx1} ${cy1} ${ex} ${ey}`;
+          strands.forEach(s => s.setAttribute('d', d));
+        }
+        setStrandPath(0);
+
+        // === PHASE 1: Web shoots from spinneret to badge (200ms) ===
+        const PHASE1_MS = 200;
+        const t1Start = performance.now();
+
+        function phase1(now) {
+          const p = Math.min(1, (now - t1Start) / PHASE1_MS);
+          const ease = 1 - (1 - p) * (1 - p);
+          setStrandPath(ease);
+          if (p < 1) { requestAnimationFrame(phase1); return; }
+
+          // === PHASE 2: Web splat impact (100ms) ===
+          splat.setAttribute('opacity', '1');
+          badge.style.border = '1.5px solid rgba(220,220,220,0.8)';
+          badge.style.boxShadow = '0 4px 18px rgba(0,0,0,0.7), 0 0 12px rgba(220,220,220,0.4)';
+          const t2Start = performance.now();
+
+          function phase2(now) {
+            const p = Math.min(1, (now - t2Start) / 100);
+            const splatOp = p < 0.5 ? p * 2 : 2 - p * 2;
+            splat.setAttribute('opacity', splatOp * 0.85);
+            if (p < 1) { requestAnimationFrame(phase2); return; }
+            splat.setAttribute('opacity', '0');
+
+            // === PHASE 3: Reel badge into button center (580ms) ===
+            const btn = document.getElementById('inauguration-btn');
+            const btnR = btn ? btn.getBoundingClientRect() : { left: window.innerWidth/2, top: window.innerHeight/2, width: 0, height: 0 };
+            const targetX = btnR.left + btnR.width/2  - badgeRect.width/2;
+            const targetY = btnR.top  + btnR.height/2 - badgeRect.height/2;
+            const startBX = bx, startBY = by;
+            const t3Start = performance.now();
+            const PHASE3_MS = 580;
+
+            function phase3(now) {
+              const p = Math.min(1, (now - t3Start) / PHASE3_MS);
+              // Accelerate into button + shrink near the end
+              const ease = p * p * p;
+              const scaleFade = p > 0.6 ? 1 - ((p - 0.6) / 0.4) * 0.7 : 1;
+              const curX = startBX + (targetX - startBX) * ease;
+              const curY = startBY + (targetY - startBY) * ease;
+              badge.style.left = curX + 'px';
+              badge.style.top  = curY + 'px';
+              badge.style.transform = `scale(${scaleFade})`;
+              badge.style.opacity = p > 0.65 ? Math.max(0, 1 - (p - 0.65) / 0.35) : '1';
+
+              // Keep web strands attached
+              const cx_ = curX + badgeRect.width  / 2;
+              const cy_ = curY + badgeRect.height / 2;
+              const tStrand = ease;
+              const sMidX = origin.x + (midX - origin.x) * tStrand;
+              const sMidY = origin.y + (midY - origin.y) * tStrand;
+              const d = `M ${origin.x} ${origin.y} Q ${sMidX} ${sMidY} ${cx_} ${cy_}`;
+              strands.forEach(s => s.setAttribute('d', d));
+
+              if (p < 1) { requestAnimationFrame(phase3); return; }
+
+              // === PHASE 4: Absorption — name disappears, web fades, button pulses ===
+              badge.style.opacity = '0';
+              badge.style.transform = 'scale(0)';
+              strands.forEach(s => s.setAttribute('opacity', '0'));
+
+              // Button pulse effect
+              const btnEl = document.getElementById('inauguration-btn');
+              if (btnEl) {
+                btnEl.style.transition = 'box-shadow 100ms ease-out';
+                btnEl.style.boxShadow = '0 0 0 6px rgba(220,20,30,0.5), 0 6px 0 0 #1a0404, inset 0 0 14px rgba(0,0,0,0.9)';
+                setTimeout(() => {
+                  if (btnEl) btnEl.style.boxShadow = '';
+                  setTimeout(() => { if (btnEl) btnEl.style.transition = ''; }, 200);
+                }, 120);
+              }
+
+              setTimeout(() => {
+                badge.remove();
+                overlay.remove();
+                onComplete();
+              }, 180);
+            }
+            requestAnimationFrame(phase3);
+          }
+          requestAnimationFrame(phase2);
+        }
+        requestAnimationFrame(phase1);
+      }));
+    }
+    // ===== END WEB-SHOOTER ENGINE =====
+
 
     // ----- Brochure / Menu Slideshow (right of the button) -----
     let brochureStamp = Date.now();
@@ -802,8 +1087,9 @@
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#050a06] font-extrabold";
         caption.innerHTML = '⚡ SYSTEM FULLY UPGRADED! Useless Projects 3.0 is live 💚 &middot; <a class="underline font-bold text-[#00ff66]" href="/celebration.html">open celebration page →</a>';
         shockwave.classList.add('hidden');
-        // Stay on the console — the celebration page is opt-in via the link above.
-        // (Auto-redirecting here yanked the projector off the main screen on load.)
+        // Spider emblem green glow
+        const spiderEl = document.getElementById('spider-emblem');
+        if (spiderEl) spiderEl.style.filter = 'drop-shadow(0 0 8px #00ff66)';
       } else if (s.buttonLocked) {
         btn.disabled = true;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-yellow-500/40 transition-all duration-200 cursor-not-allowed bg-yellow-500/20";
@@ -812,6 +1098,8 @@
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-yellow-500/70";
         caption.textContent = "🔒 button is locked by the admin";
         shockwave.classList.add('hidden');
+        const spiderEl = document.getElementById('spider-emblem');
+        if (spiderEl) spiderEl.style.filter = 'drop-shadow(0 0 4px rgba(200,150,0,0.4))';
       } else if (s.paused) {
         btn.disabled = true;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00ff66]/30 transition-all duration-200 cursor-not-allowed bg-[#00ff66]/10";
@@ -819,6 +1107,8 @@
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#00ff66]/40";
         caption.textContent = "system is paused by admin";
         shockwave.classList.add('hidden');
+        const spiderEl = document.getElementById('spider-emblem');
+        if (spiderEl) spiderEl.style.filter = 'none';
       } else if (isArmed) {
         btn.disabled = false;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00ff66] transition-all duration-200 cursor-pointer bg-[#00ff66] animate-btn-breathe active:translate-y-2";
@@ -828,6 +1118,8 @@
         caption.textContent = "⚡ ALL CIRCUITS ONLINE — UPGRADE READY. PRESS THE CORE.";
         shockwave.classList.remove('hidden');
         shockwave.className = "absolute inset-0 rounded-full bg-[#00ff66]/30";
+        const spiderEl = document.getElementById('spider-emblem');
+        if (spiderEl) spiderEl.style.filter = 'drop-shadow(0 0 6px #00ff66)';
       } else {
         btn.disabled = true;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00ff66]/40 transition-all duration-200 cursor-not-allowed bg-[#00ff66]/15";
@@ -836,6 +1128,8 @@
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#00ff66]/50";
         caption.textContent = `system unupgraded until all 24 circuits connect (${count}/${target})`;
         shockwave.classList.add('hidden');
+        const spiderEl = document.getElementById('spider-emblem');
+        if (spiderEl) spiderEl.style.filter = 'none';
       }
 
       // Update Ticker

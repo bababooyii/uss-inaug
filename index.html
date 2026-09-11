@@ -570,10 +570,10 @@
       const shockwave = document.getElementById('btn-shockwave');
 
       if (s.fired) {
-        btn.disabled = true;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00BCD4] transition-all duration-200 cursor-not-allowed bg-[#00BCD4]";
+        btn.disabled = false;
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00BCD4] transition-all duration-200 cursor-pointer bg-[#00BCD4]";
         btn.style.boxShadow = "0 0 30px rgba(0,188,212,0.4), inset 0 0 15px rgba(255,255,255,0.3)";
-        caption.innerHTML = '⚡ SYSTEM FULLY UPGRADED! Useless Projects 3.0 is live &middot; <a class="underline font-bold text-[#00838F]" href="/celebration.html">open celebration page →</a>';
+        caption.textContent = '⚡ SYSTEM FULLY UPGRADED! Click to celebrate.';
         shockwave.classList.add('hidden');
       } else if (s.buttonLocked) {
         btn.disabled = true;
@@ -656,9 +656,11 @@
       };
     }
 
-    // Inauguration Button Trigger
+    // Button Click
     document.getElementById('inauguration-btn').addEventListener('click', async () => {
-      if (state.attendees.length >= state.target && !state.fired && !state.paused && !state.buttonLocked) {
+      if (state.fired) {
+        window.location.href = '/celebration.html';
+      } else if (state.attendees.length >= state.target && !state.paused && !state.buttonLocked) {
         await fetch('/api/fire', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

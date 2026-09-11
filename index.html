@@ -8,17 +8,19 @@
   <link rel="stylesheet" href="_external/fonts.googleapis.com/css2.family_Fredoka_wght_500_600_700_family_Patrick_Hand_display_swap.css">
   <style>
     :root {
-      --reishi: #c62828;
-      --reishi-deep: #5c0a0a;
-      --color-reishi: #c62828;
-      --color-reishi-deep: #5c0a0a;
-      --upgrade-neon: #c62828;
-      --upgrade-glow: rgba(198, 40, 40, 0.6);
-      --upgrade-bg: #0d0404;
+      --background: #E0F7FA;
+      --foreground: #1A1A2E;
+      --card: #FFFFFF;
+      --secondary: #B2EBF2;
+      --border: #1A1A2E;
+      --accent: #E53935;
+      --accent-deep: #B71C1C;
+      --cyan: #00BCD4;
+      --cyan-deep: #00838F;
     }
     body {
-      background-color: var(--background, #FAF9F6);
-      color: var(--foreground, #1B1B1B);
+      background-color: var(--background);
+      color: var(--foreground);
       font-family: 'Fredoka', -apple-system, sans-serif;
     }
     .font-hand {
@@ -29,44 +31,44 @@
       font-weight: 700;
     }
     .panel {
-      background: var(--card, #FFFFFF);
-      border: 2px solid var(--foreground, #1B1B1B);
+      background: var(--card);
+      border: 2px solid var(--border);
       border-radius: 16px;
-      box-shadow: 4px 6px 0 0 var(--foreground, #1B1B1B);
+      box-shadow: 4px 6px 0 0 var(--border);
     }
     .pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      border: 2px solid var(--foreground, #1B1B1B);
+      border: 2px solid var(--border);
       border-radius: 9999px;
       padding: 4px 14px;
       font-size: 0.9rem;
       font-weight: 600;
-      background: var(--secondary, #F4F2EB);
+      background: var(--card);
     }
     .btn-ink {
-      background: var(--foreground, #1B1B1B);
-      color: var(--background, #FAF9F6);
-      border: 2px solid var(--foreground, #1B1B1B);
+      background: var(--foreground);
+      color: var(--background);
+      border: 2px solid var(--foreground);
       border-radius: 9999px;
       padding: 10px 24px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 2px 4px 0 0 rgba(0,0,0,0.3);
+      box-shadow: 2px 4px 0 0 rgba(0,0,0,0.2);
       transition: all 0.15s ease;
     }
     .btn-ink:hover {
       transform: translateY(-2px);
-      box-shadow: 2px 6px 0 0 rgba(0,0,0,0.4);
+      box-shadow: 2px 6px 0 0 rgba(0,0,0,0.25);
     }
     .btn-ink:active {
       transform: translateY(1px);
     }
     .btn-outline {
       background: transparent;
-      color: var(--foreground, #1B1B1B);
-      border: 2px solid var(--foreground, #1B1B1B);
+      color: var(--foreground);
+      border: 2px solid var(--foreground);
       border-radius: 9999px;
       padding: 10px 24px;
       font-weight: 600;
@@ -74,48 +76,36 @@
       transition: all 0.15s ease;
     }
     .btn-outline:hover {
-      background: var(--secondary, #F4F2EB);
+      background: var(--secondary);
     }
-    /* Spider Stage Styling */
+    /* Spider Stage */
     .stage-col {
-      background: radial-gradient(circle at 50% 50%, #1a0808 0%, #0d0404 70%, #060202 100%) !important;
-      border: 3px solid #c62828 !important;
-      box-shadow: 4px 6px 0 0 #5c0a0a, 0 0 35px rgba(198, 40, 40, 0.2) !important;
+      background: var(--card) !important;
+      border: 2px solid var(--border) !important;
+      box-shadow: 4px 6px 0 0 var(--border) !important;
       position: relative;
       overflow: hidden;
     }
-    .stage-col::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(circle at 50% 50%, rgba(198, 40, 40, 0.08) 0%, transparent 65%);
-      pointer-events: none;
-    }
     #roots-badge {
-      background: #1a0808 !important;
-      color: #ff5252 !important;
-      border: 2px solid #c62828 !important;
-      box-shadow: 0 0 14px rgba(198, 40, 40, 0.4) !important;
+      background: var(--card) !important;
+      color: var(--accent) !important;
+      border: 2px solid var(--accent) !important;
       letter-spacing: 0.06em;
     }
     #btn-status-caption {
-      background: rgba(26, 8, 8, 0.95) !important;
-      color: #ffcdd2 !important;
-      border: 2px solid #c62828 !important;
-      box-shadow: 0 0 16px rgba(198, 40, 40, 0.3) !important;
+      background: var(--card) !important;
+      color: var(--foreground) !important;
+      border: 2px solid var(--border) !important;
+      box-shadow: 2px 3px 0 0 var(--border) !important;
     }
     #progress-bar {
-      background-color: #c62828 !important;
-      box-shadow: 0 0 12px rgba(198, 40, 40, 0.7);
+      background-color: var(--accent) !important;
     }
     @keyframes shockwave {
-      0% { transform: scale(1); opacity: 0.5; }
+      0% { transform: scale(1); opacity: 0.4; }
       100% { transform: scale(1.8); opacity: 0; }
     }
-    /* Desktop-first projector layout: QR | Button | Brochure columns */
     .desk-stage { flex-direction: column; }
-    /* Spider stage: square that fills its column */
     .stage-col > .stage-grid {
       width: 100%;
       max-width: 100%;
@@ -127,7 +117,6 @@
       .desk-stage > .qr-col { width: 360px; flex: 0 0 360px; align-self: center; }
       .desk-stage > .stage-col { flex: 1 1 auto; min-width: 0; min-height: 0; }
       .desk-stage > .brochure-col { width: 280px; flex: 0 0 280px; }
-      /* Fill the column height so the roots + button use the whole projector stage */
       .stage-col > .stage-grid { width: auto; height: 100%; }
     }
     #brochure-panel { display: flex; }
@@ -135,8 +124,8 @@
     .marquee-strip {
       overflow: hidden;
       white-space: nowrap;
-      background: var(--foreground, #1B1B1B);
-      color: var(--background, #FAF9F6);
+      background: var(--accent);
+      color: #FFF9C4;
     }
     .marquee-track {
       display: inline-flex;
@@ -160,11 +149,11 @@
       pointer-events: none;
       font-family: 'Patrick Hand', cursive;
       font-size: 1.35rem;
-      background: var(--card, #FFFFFF);
-      border: 2px solid var(--foreground, #1B1B1B);
+      background: var(--card);
+      border: 2px solid var(--border);
       border-radius: 9999px;
       padding: 8px 20px;
-      box-shadow: 3px 4px 0 0 var(--foreground, #1B1B1B);
+      box-shadow: 3px 4px 0 0 var(--border);
       animation: float-name-rise 4.5s ease-out forwards;
     }
     @keyframes float-name-rise {
@@ -176,7 +165,7 @@
   </style>
 </head>  <body class="min-h-screen flex flex-col">
   <!-- Top Header Banner -->
-  <header class="border-b-2 border-foreground bg-foreground px-6 py-3 flex items-center justify-between shadow-sm">
+  <header class="border-b-2 border-foreground bg-[#00BCD4] px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="w-24"></div>
     <img src="__l5e/assets-v1/634a551f-8685-4759-b46e-fdbe6a390438/tinkerhub-snmimt-banner.png" alt="TinkerHub SNMIMT" class="h-14 sm:h-18 w-auto object-contain">
     <div class="w-24"></div>
@@ -194,39 +183,39 @@
     <section class="qr-col space-y-5">
       <div class="panel p-6 text-center space-y-4">
         <div class="flex items-center justify-between">
-          <span class="pill bg-tetris-yellow text-foreground text-xs">📲 Maker Check-in</span>
-          <span id="live-indicator" class="pill text-xs bg-green-100 text-green-800">● Live Sync</span>
+          <span class="pill text-xs" style="background: #FFF9C4; color: #1A1A2E;">📲 Maker Check-in</span>
+          <span id="live-indicator" class="pill text-xs" style="background: #E8F5E9; color: #2E7D32;">● Live Sync</span>
         </div>
 
         <h2 class="font-display text-2xl leading-tight">Scan to Check In</h2>
-        <p class="font-hand text-muted-foreground text-sm">Scan with your phone & enter your name to upgrade the console</p>
+        <p class="font-hand text-sm" style="color: #555;">Scan with your phone & enter your name to check in</p>
 
         <!-- QR Code — served by THIS server (admin-uploaded or auto-generated) -->
         <div class="flex justify-center my-2">
-          <div class="p-3 bg-[#FAF9F6] border-2 border-foreground rounded-2xl shadow-sm inline-block">
+          <div class="p-3 bg-white border-2 border-foreground rounded-2xl shadow-sm inline-block">
             <img id="qr-img" src="/api/qr" alt="Scan QR Code to Register" class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg">
           </div>
           </div>
           <div class="mt-1 text-center">
-            <a id="qr-url-text" href="/scan.html" target="_blank" class="font-mono text-xs text-muted-foreground hover:text-foreground underline break-all">/scan.html</a>
+            <a id="qr-url-text" href="/scan.html" target="_blank" class="font-mono text-xs underline break-all" style="color: #777;">/scan.html</a>
         </div>
 
         <!-- Progress Counter -->
         <div class="space-y-2 pt-2">
           <div class="flex items-center justify-between font-display">
-            <span class="text-sm uppercase tracking-wider text-muted-foreground">Makers In</span>
-            <span class="text-3xl"><span id="count-num">0</span><span id="target-num" class="text-muted-foreground text-xl"> / 32</span></span>
+            <span class="text-sm uppercase tracking-wider" style="color: #777;">Makers In</span>
+            <span class="text-3xl"><span id="count-num">0</span><span id="target-num" class="text-xl" style="color: #999;"> / 32</span></span>
           </div>
-          <div class="h-4 w-full overflow-hidden rounded-full border-2 border-foreground bg-secondary">
-            <div id="progress-bar" class="h-full bg-reishi transition-[width] duration-500 rounded-full" style="width: 0%"></div>
+          <div class="h-4 w-full overflow-hidden rounded-full border-2 border-foreground" style="background: #E0E0E0;">
+            <div id="progress-bar" class="h-full transition-[width] duration-500 rounded-full" style="width: 0%; background-color: var(--accent);"></div>
           </div>
         </div>
 
         <!-- Recent Scanner Ticker -->
-        <div class="pt-2 border-t border-border/60 text-left">
-          <p class="font-display text-xs text-muted-foreground uppercase tracking-wider mb-2">Latest Check-ins</p>
+        <div class="pt-2 text-left" style="border-top: 1px solid #E0E0E0;">
+          <p class="font-display text-xs uppercase tracking-wider mb-2" style="color: #777;">Latest Check-ins</p>
           <div id="recent-ticker" class="space-y-1.5 max-h-28 overflow-y-auto font-hand text-sm">
-            <p class="text-muted-foreground text-xs italic">Waiting for first scan...</p>
+            <p class="text-xs italic" style="color: #999;">Waiting for first scan...</p>
           </div>
         </div>
       </div>
@@ -249,13 +238,13 @@
             <!-- Shockwave ripple when armed -->
             <span id="btn-shockwave" class="hidden absolute inset-0 rounded-full" style="background: radial-gradient(circle, rgba(198,40,40,0.4) 0%, transparent 70%); animation: shockwave 2.2s ease-out infinite"></span>
 
-            <!-- Outer bezel ring — dark matte with red accent rim -->
-            <div class="relative grid h-56 w-56 place-items-center rounded-full" style="background: radial-gradient(circle at 40% 35%, #1c1c1c, #0a0a0a); border: 3.5px solid #2a0a0a; box-shadow: 0 0 0 1.5px #3a1010, 0 0 30px rgba(198,40,40,0.2), 0 8px 24px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.85);">
+            <!-- Outer bezel ring — light with subtle shadow -->
+            <div class="relative grid h-56 w-56 place-items-center rounded-full" style="background: radial-gradient(circle at 40% 35%, #f5f5f5, #e0e0e0); border: 3px solid var(--border); box-shadow: 0 0 0 1.5px var(--border), 0 8px 24px rgba(0,0,0,0.15), inset 0 0 15px rgba(0,0,0,0.05);">
 
               <!-- Inner button — red with black spider -->
               <button id="inauguration-btn" type="button" disabled aria-label="Inauguration button"
                 class="group relative grid h-40 w-40 place-items-center rounded-full transition-all duration-200 cursor-not-allowed"
-                style="background: radial-gradient(circle at 42% 38%, #c62828, #8e1414); border: 3px solid #5c0a0a; box-shadow: 0 6px 0 0 #4a0808, inset 0 0 14px rgba(0,0,0,0.3);">
+                style="background: radial-gradient(circle at 42% 38%, #E53935, #C62828); border: 3px solid #B71C1C; box-shadow: 0 6px 0 0 #8E1414, inset 0 0 14px rgba(0,0,0,0.2);">
 
                 <!-- Spider-Man Logo SVG — black spider on red -->
                 <svg id="spider-emblem" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"
@@ -310,9 +299,9 @@
 
     <!-- Brochure / Menu Slideshow — independent right column (like the QR column) -->
     <aside id="brochure-panel" class="panel brochure-col hidden min-h-[420px] flex-col items-center justify-center gap-3">
-      <span class="pill font-display text-xs bg-tetris-cyan">📜 Menu / Brochure</span>
-      <div id="brochure-stage" class="flex-1 w-full flex items-center justify-center overflow-hidden rounded-xl border-2 border-foreground bg-card min-h-[320px]"></div>
-      <p id="brochure-caption" class="font-hand text-xs text-muted-foreground text-center"></p>
+      <span class="pill font-display text-xs" style="background: #E0F7FA; color: #00838F;">📜 Menu / Brochure</span>
+      <div id="brochure-stage" class="flex-1 w-full flex items-center justify-center overflow-hidden rounded-xl border-2 border-foreground bg-white min-h-[320px]"></div>
+      <p id="brochure-caption" class="font-hand text-xs text-center" style="color: #777;"></p>
     </aside>
   </main>
 
@@ -326,13 +315,13 @@
   </div>
 
   <!-- Secret Admin Gate (footer heart × 5) -->
-  <div id="secret-admin-overlay" class="fixed inset-0 z-[60] hidden place-items-center bg-background/95 backdrop-blur-md">
+  <div id="secret-admin-overlay" class="fixed inset-0 z-[60] hidden place-items-center" style="background: rgba(224,247,250,0.95); backdrop-filter: blur(8px);">
     <div class="panel p-8 w-full max-w-sm text-center space-y-4">
       <h2 class="font-display text-2xl">Admin Access</h2>
-      <p class="font-hand text-sm text-muted-foreground">Enter the admin password</p>
+      <p class="font-hand text-sm" style="color: #777;">Enter the admin password</p>
       <input id="admin-password-input" type="password" placeholder="Password" autocomplete="off"
-             class="w-full rounded-xl border-2 border-foreground bg-card p-3 text-center font-display tracking-widest outline-none">
-      <p id="admin-gate-error" class="font-hand text-sm text-btn-red hidden">Wrong password</p>
+             class="w-full rounded-xl border-2 border-foreground bg-white p-3 text-center font-display tracking-widest outline-none">
+      <p id="admin-gate-error" class="font-hand text-sm hidden" style="color: #E53935;">Wrong password</p>
       <div class="flex gap-2 justify-center">
         <button id="admin-gate-cancel" class="btn-outline px-4 py-2 text-sm">Cancel</button>
         <button id="admin-gate-enter" class="btn-ink px-6 py-2 text-sm">Unlock →</button>
@@ -341,8 +330,8 @@
   </div>
 
   <!-- Footer -->
-  <footer class="px-6 py-4 text-center font-hand text-sm text-muted-foreground border-t border-border/40">
-    built with <span id="secret-heart" class="text-btn-red cursor-pointer select-none" title="">♥</span> for the snmimt tinkerhub campus community
+  <footer class="px-6 py-4 text-center font-hand text-sm" style="color: #777; border-top: 1px solid #E0E0E0;">
+    built with <span id="secret-heart" class="cursor-pointer select-none" style="color: #E53935;" title="">♥</span> for the snmimt tinkerhub campus community
   </footer>
 
   <script>
@@ -428,14 +417,14 @@
         fontFamily: "'Fredoka', sans-serif",
         fontSize: '1.05rem',
         fontWeight: '700',
-        color: '#fff',
+        color: '#1A1A2E',
         letterSpacing: '0.06em',
-        background: 'linear-gradient(145deg, rgba(18,18,18,0.95), rgba(40,6,6,0.92))',
-        border: '1.5px solid rgba(200,25,35,0.5)',
+        background: '#ffffff',
+        border: '2px solid #1A1A2E',
         borderRadius: '6px',
         padding: '7px 16px',
         whiteSpace: 'nowrap',
-        boxShadow: '0 4px 18px rgba(0,0,0,0.7), 0 0 8px rgba(200,25,35,0.25)',
+        boxShadow: '3px 4px 0 0 #1A1A2E',
         pointerEvents: 'none',
         zIndex: '50',
         userSelect: 'none',
@@ -475,9 +464,9 @@
         // Primary strand + two secondary strands for realism
         const strands = [];
         const strandConfigs = [
-          { stroke: '#ffffff', width: 2, opacity: 0.95, dash: '' },
-          { stroke: '#e0e0e0', width: 1.2, opacity: 0.7, dash: '' },
-          { stroke: '#cccccc', width: 0.8, opacity: 0.45, dash: '4 3' },
+          { stroke: '#1A1A2E', width: 2, opacity: 0.85, dash: '' },
+          { stroke: '#555555', width: 1.2, opacity: 0.6, dash: '' },
+          { stroke: '#888888', width: 0.8, opacity: 0.4, dash: '4 3' },
         ];
         for (const cfg of strandConfigs) {
           const s = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -501,7 +490,7 @@
           line.setAttribute('y1', badgeCY + Math.sin(angle) * 4);
           line.setAttribute('x2', badgeCX + Math.cos(angle) * 22);
           line.setAttribute('y2', badgeCY + Math.sin(angle) * 22);
-          line.setAttribute('stroke', '#ffffff');
+          line.setAttribute('stroke', '#1A1A2E');
           line.setAttribute('stroke-width', '1');
           splat.appendChild(line);
         }
@@ -511,7 +500,7 @@
           arc.setAttribute('cy', badgeCY);
           arc.setAttribute('r', ri * 10);
           arc.setAttribute('fill', 'none');
-          arc.setAttribute('stroke', '#ffffff');
+          arc.setAttribute('stroke', '#1A1A2E');
           arc.setAttribute('stroke-width', '0.7');
           arc.setAttribute('stroke-dasharray', `${ri * 3} ${ri * 2}`);
           splat.appendChild(arc);
@@ -544,8 +533,8 @@
 
           // === PHASE 2: Web splat impact (100ms) ===
           splat.setAttribute('opacity', '1');
-          badge.style.border = '1.5px solid rgba(220,220,220,0.8)';
-          badge.style.boxShadow = '0 4px 18px rgba(0,0,0,0.7), 0 0 12px rgba(220,220,220,0.4)';
+          badge.style.border = '2px solid #1A1A2E';
+          badge.style.boxShadow = '3px 4px 0 0 #1A1A2E, 0 0 10px rgba(0,188,212,0.3)';
           const t2Start = performance.now();
 
           function phase2(now) {
@@ -596,7 +585,7 @@
               const btnEl = document.getElementById('inauguration-btn');
               if (btnEl) {
                 btnEl.style.transition = 'box-shadow 100ms ease-out';
-                btnEl.style.boxShadow = '0 0 0 6px rgba(220,20,30,0.5), 0 6px 0 0 #1a0404, inset 0 0 14px rgba(0,0,0,0.9)';
+                btnEl.style.boxShadow = '0 0 0 6px rgba(0,188,212,0.4), 0 6px 0 0 #B71C1C, inset 0 0 14px rgba(0,0,0,0.2)';
                 setTimeout(() => {
                   if (btnEl) btnEl.style.boxShadow = '';
                   setTimeout(() => { if (btnEl) btnEl.style.transition = ''; }, 200);
@@ -634,7 +623,7 @@
 
       if (!n) {
         panel.classList.add('hidden');
-        stage.innerHTML = '<p class="font-hand text-sm text-muted-foreground p-6 text-center">Menu / brochure will appear here once the admin uploads it.</p>';
+        stage.innerHTML = '<p class="font-hand text-sm p-6 text-center" style="color: #999;">Menu / brochure will appear here once the admin uploads it.</p>';
         caption.textContent = '';
         if (brochureTimer) { clearInterval(brochureTimer); brochureTimer = null; }
         brochureCount = 0;
@@ -699,50 +688,50 @@
 
       if (s.fired) {
         btn.disabled = true;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#c62828] transition-all duration-200 cursor-not-allowed bg-[#c62828]";
-        btn.style.boxShadow = "0 0 45px #c62828, inset 0 0 20px rgba(255,255,255,0.5)";
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00BCD4] transition-all duration-200 cursor-not-allowed bg-[#00BCD4]";
+        btn.style.boxShadow = "0 0 30px rgba(0,188,212,0.4), inset 0 0 15px rgba(255,255,255,0.3)";
         label.textContent = "UPGRADED";
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-white font-extrabold";
-        caption.innerHTML = '⚡ SYSTEM FULLY UPGRADED! Useless Projects 3.0 is live &middot; <a class="underline font-bold text-[#ff5252]" href="/celebration.html">open celebration page →</a>';
+        caption.innerHTML = '⚡ SYSTEM FULLY UPGRADED! Useless Projects 3.0 is live &middot; <a class="underline font-bold text-[#00838F]" href="/celebration.html">open celebration page →</a>';
         shockwave.classList.add('hidden');
         const spiderEl = document.getElementById('spider-emblem');
-        if (spiderEl) spiderEl.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.6))';
+        if (spiderEl) spiderEl.style.filter = 'drop-shadow(0 0 6px rgba(255,255,255,0.5))';
       } else if (s.buttonLocked) {
         btn.disabled = true;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-yellow-500/40 transition-all duration-200 cursor-not-allowed bg-yellow-500/20";
-        btn.style.boxShadow = "0 8px 0 0 rgba(161, 98, 7, 0.4)";
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-yellow-500/50 transition-all duration-200 cursor-not-allowed bg-yellow-400/25";
+        btn.style.boxShadow = "0 6px 0 0 rgba(200, 150, 0, 0.3)";
         label.textContent = "LOCKED";
-        label.className = "font-display text-center text-lg leading-tight tracking-widest text-yellow-500/70";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-yellow-700";
         caption.textContent = "🔒 button is locked by the admin";
         shockwave.classList.add('hidden');
         const spiderEl = document.getElementById('spider-emblem');
         if (spiderEl) spiderEl.style.filter = 'none';
       } else if (s.paused) {
         btn.disabled = true;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#c62828]/30 transition-all duration-200 cursor-not-allowed bg-[#c62828]/10";
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#E53935]/30 transition-all duration-200 cursor-not-allowed bg-[#E53935]/10";
         label.textContent = "PAUSED";
-        label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#c62828]/40";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#E53935]/50";
         caption.textContent = "system is paused by admin";
         shockwave.classList.add('hidden');
         const spiderEl = document.getElementById('spider-emblem');
         if (spiderEl) spiderEl.style.filter = 'none';
       } else if (isArmed) {
         btn.disabled = false;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#c62828] transition-all duration-200 cursor-pointer bg-[#c62828] animate-btn-breathe active:translate-y-2";
-        btn.style.boxShadow = "0 0 40px #c62828, 0 8px 0 0 #8e1414, inset 0 -6px 14px rgba(0,0,0,.3)";
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#E53935] transition-all duration-200 cursor-pointer bg-[#E53935] animate-btn-breathe active:translate-y-2";
+        btn.style.boxShadow = "0 0 30px rgba(229,57,53,0.4), 0 6px 0 0 #B71C1C, inset 0 -4px 12px rgba(0,0,0,.2)";
         label.textContent = "UPGRADE";
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-white font-extrabold";
         caption.textContent = "⚡ ALL SCANNED — UPGRADE READY. PRESS THE CORE.";
         shockwave.classList.remove('hidden');
-        shockwave.className = "absolute inset-0 rounded-full bg-[#c62828]/30";
+        shockwave.className = "absolute inset-0 rounded-full bg-[#E53935]/25";
         const spiderEl = document.getElementById('spider-emblem');
-        if (spiderEl) spiderEl.style.filter = 'drop-shadow(0 0 6px rgba(255,82,82,0.7))';
+        if (spiderEl) spiderEl.style.filter = 'drop-shadow(0 0 5px rgba(229,57,53,0.5))';
       } else {
         btn.disabled = true;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#c62828]/40 transition-all duration-200 cursor-not-allowed bg-[#c62828]/15";
-        btn.style.boxShadow = "0 8px 0 0 rgba(92, 10, 10, 0.4)";
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#E53935]/30 transition-all duration-200 cursor-not-allowed bg-[#E53935]/10";
+        btn.style.boxShadow = "0 6px 0 0 rgba(183, 28, 28, 0.2)";
         label.textContent = "UPGRADE";
-        label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#c62828]/50";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#E53935]/50";
         caption.textContent = `awaiting scan to activate (${count}/${target})`;
         shockwave.classList.add('hidden');
         const spiderEl = document.getElementById('spider-emblem');
@@ -752,12 +741,12 @@
       // Update Ticker
       const ticker = document.getElementById('recent-ticker');
       if (s.attendees.length === 0) {
-        ticker.innerHTML = '<p class="text-muted-foreground text-xs italic">Waiting for first scan...</p>';
+        ticker.innerHTML = '<p class="text-xs italic" style="color: #999;">Waiting for first scan...</p>';
       } else {
         ticker.innerHTML = s.attendees.slice(0, 5).map(a => `
-          <div class="flex items-center justify-between py-1 border-b border-border/40 animate-ticker-in">
-            <span class="font-bold text-foreground">#${a.id} ${escapeHtml(a.name)}</span>
-            <span class="text-xs text-muted-foreground font-mono">${escapeHtml(a.ticket)}</span>
+          <div class="flex items-center justify-between py-1 animate-ticker-in" style="border-bottom: 1px solid #E0E0E0;">
+            <span class="font-bold">#${a.id} ${escapeHtml(a.name)}</span>
+            <span class="text-xs font-mono" style="color: #999;">${escapeHtml(a.ticket)}</span>
           </div>
         `).join('');
       }
@@ -774,7 +763,9 @@
 
       evt.onopen = () => {
         ind.textContent = '● Live Sync';
-        ind.className = 'pill text-xs bg-green-100 text-green-800';
+        ind.className = 'pill text-xs';
+        ind.style.background = '#E8F5E9';
+        ind.style.color = '#2E7D32';
       };
 
       evt.addEventListener('init', e => updateStateUI(JSON.parse(e.data).state));
@@ -794,7 +785,9 @@
 
       evt.onerror = () => {
         ind.textContent = '○ Reconnecting...';
-        ind.className = 'pill text-xs bg-yellow-100 text-yellow-800';
+        ind.className = 'pill text-xs';
+        ind.style.background = '#FFF3E0';
+        ind.style.color = '#E65100';
         evt.close();
         setTimeout(connectSSE, 2500);
       };

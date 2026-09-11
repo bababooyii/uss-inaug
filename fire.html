@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fire Button — Useless Projects 3.0</title>
+  <link rel="stylesheet" href="assets/styles-Cc3jfXhB.css">
+  <link rel="stylesheet" href="_external/fonts.googleapis.com/css2.family_Fredoka_wght_500_600_700_family_Patrick_Hand_display_swap.css">
+  <style>
+    body {
+      background-color: var(--background, #FAF9F6);
+      color: var(--foreground, #1B1B1B);
+      font-family: 'Fredoka', -apple-system, sans-serif;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    #fire-btn {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      border: 6px solid #B71C1C;
+      background: radial-gradient(circle at 35% 35%, #EF5350, #E53935 40%, #C62828 80%, #B71C1C);
+      color: white;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 8px 0 0 #7F0000, 0 12px 30px rgba(229,57,53,0.5), inset 0 0 20px rgba(0,0,0,0.2);
+      transition: all 150ms ease;
+      user-select: none;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    #fire-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 11px 0 0 #7F0000, 0 16px 40px rgba(229,57,53,0.6), inset 0 0 20px rgba(0,0,0,0.2);
+    }
+    #fire-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 4px 0 0 #7F0000, 0 6px 15px rgba(229,57,53,0.4), inset 0 0 20px rgba(0,0,0,0.2);
+    }
+    #status {
+      margin-top: 24px;
+      font-family: 'Patrick Hand', cursive;
+      font-size: 1.1rem;
+      min-height: 1.5em;
+    }
+    .ok { color: #2E7D32; }
+    .err { color: #C62828; }
+  </style>
+</head>
+<body>
+  <div style="text-align:center">
+    <button id="fire-btn" onclick="fire()">FIRE</button>
+    <div id="status"></div>
+  </div>
+  <script>
+    async function fire() {
+      const btn = document.getElementById('fire-btn');
+      const status = document.getElementById('status');
+      btn.disabled = true;
+      status.textContent = 'Firing...';
+      status.className = '';
+      try {
+        const res = await fetch('/api/fire', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fired: true })
+        });
+        const data = await res.json();
+        if (data.success) {
+          status.textContent = 'Fired!';
+          status.className = 'ok';
+        } else {
+          status.textContent = data.message || 'Failed';
+          status.className = 'err';
+        }
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+        status.className = 'err';
+      }
+      setTimeout(() => { btn.disabled = false; }, 1000);
+    }
+  </script>
+</body>
+</html>

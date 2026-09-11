@@ -19,6 +19,7 @@
       --cyan-deep: #00838F;
     }
     body {
+      background: url('assets/uselessbg.png') center bottom / cover no-repeat fixed;
       background-color: var(--background);
       color: var(--foreground);
       font-family: 'Fredoka', -apple-system, sans-serif;
@@ -31,10 +32,11 @@
       font-weight: 700;
     }
     .panel {
-      background: var(--card);
+      background: rgba(255, 255, 255, 0.92);
       border: 2px solid var(--border);
       border-radius: 16px;
       box-shadow: 4px 6px 0 0 var(--border);
+      backdrop-filter: blur(4px);
     }
     .pill {
       display: inline-flex;
@@ -399,6 +401,9 @@
         badge.style.transition = 'opacity 100ms ease-out';
         badge.style.opacity = '1';
 
+        // Pause so name is visible before bullet fires
+        setTimeout(() => {
+
         // --- 2. Create bullet element ---
         const bullet = document.createElement('div');
         Object.assign(bullet.style, {
@@ -485,6 +490,8 @@
           }, 400);
         }
         requestAnimationFrame(flyBullet);
+
+        }, 600); // end setTimeout — 600ms delay so name is visible
       }));
     }
     // ===== END BULLET ENGINE =====

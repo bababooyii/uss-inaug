@@ -73,11 +73,20 @@
     }
     /* Desktop-first projector layout: QR | Button | Brochure columns */
     .desk-stage { flex-direction: column; }
+    /* Reishi stage: square that fills its column (width-driven on mobile, height-driven on desktop) */
+    .stage-col > .stage-grid {
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 1;
+      height: auto;
+    }
     @media (min-width: 700px) {
       .desk-stage { flex-direction: row; align-items: stretch; }
       .desk-stage > .qr-col { width: 360px; flex: 0 0 360px; align-self: center; }
-      .desk-stage > .stage-col { flex: 1 1 auto; min-width: 0; }
+      .desk-stage > .stage-col { flex: 1 1 auto; min-width: 0; min-height: 0; }
       .desk-stage > .brochure-col { width: 280px; flex: 0 0 280px; }
+      /* Fill the column height so the roots + button use the whole projector stage */
+      .stage-col > .stage-grid { width: auto; height: 100%; }
     }
     #brochure-panel { display: flex; }
     #brochure-panel.hidden { display: none; }
@@ -123,8 +132,7 @@
       100% { transform: translateY(-88vh) rotate(3deg); opacity: 0; }
     }
   </style>
-</head>
-<body class="min-h-screen flex flex-col justify-between">
+</head>  <body class="min-h-screen flex flex-col">
   <!-- Top Header Banner -->
   <header class="border-b-2 border-foreground bg-foreground px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="w-24"></div>
@@ -138,7 +146,7 @@
   </div>
 
   <!-- Main Display Stage -->
-  <main class="mx-auto flex w-full max-w-[1500px] flex-1 flex-col gap-6 px-6 py-6 desk-stage">
+  <main class="mx-auto flex w-full max-w-[1500px] min-h-0 flex-1 flex-col gap-6 px-6 py-6 desk-stage">
     
     <!-- Left Column: Scan QR Code & Live Registration Info -->
     <section class="qr-col space-y-5">
@@ -190,8 +198,8 @@
         <span id="lock-badge" class="pill font-display bg-yellow-100 text-yellow-900" style="display:none">🔒 LOCKED</span>
       </div>
 
-      <!-- Center Reishi Roots SVG & Button -->
-      <div class="relative grid aspect-square w-full max-w-[620px] min-w-0 flex-1 place-items-center">
+      <!-- Center Reishi Roots SVG & Button — fills the column (see .stage-grid CSS) -->
+      <div class="stage-grid relative grid min-w-0 place-items-center">
         <div class="absolute inset-0 pointer-events-none">
           <svg id="reishi-svg" viewBox="0 0 1000 1000" class="h-full w-full" aria-hidden="true">
             <defs>
@@ -584,12 +592,10 @@
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red";
         label.textContent = "LIVE";
         label.className = "font-display text-center text-lg leading-tight tracking-widest text-primary-foreground";
-        caption.textContent = "reishi released. useless projects 3.0 is live <3";
+        caption.innerHTML = 'reishi released. useless projects 3.0 is live &lt;3 &middot; <a class="underline font-bold" href="/celebration.html">open celebration page →</a>';
         shockwave.classList.add('hidden');
-        // Celebration lives on its own page now
-        if (location.pathname !== '/celebration.html') {
-          window.location.href = '/celebration.html';
-        }
+        // Stay on the console — the celebration page is opt-in via the link above.
+        // (Auto-redirecting here yanked the projector off the main screen on load.)
       } else if (s.buttonLocked) {
         btn.disabled = true;
         btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";

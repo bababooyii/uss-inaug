@@ -302,6 +302,34 @@
             <circle id="upgrade-reticle-outer" cx="500" cy="500" r="222" fill="none" stroke="#00ff66" stroke-width="2.5" stroke-dasharray="38 18 10 18" filter="url(#upgrade-glow)" style="transform-origin: 500px 500px; animation: reticle-spin-cw 28s linear infinite; opacity: 0.8;"></circle>
             <circle id="upgrade-reticle-inner" cx="500" cy="500" r="202" fill="none" stroke="#55ffa8" stroke-width="1.8" stroke-dasharray="6 14" filter="url(#upgrade-glow)" style="transform-origin: 500px 500px; animation: reticle-spin-ccw 18s linear infinite; opacity: 0.75;"></circle>
             
+            <!-- PCB Socket Boundary & Silkscreen Framing Around Button -->
+            <rect x="295" y="295" width="410" height="410" rx="20" fill="none" stroke="#00ff66" stroke-width="1.5" stroke-dasharray="14 10" stroke-opacity="0.3"></rect>
+            
+            <!-- PCB Corner Fiducial Brackets -->
+            <g stroke="#00ff66" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6">
+              <path d="M 315 348 L 315 315 L 348 315"></path>
+              <path d="M 685 348 L 685 315 L 652 315"></path>
+              <path d="M 315 652 L 315 685 L 348 685"></path>
+              <path d="M 685 652 L 685 685 L 652 685"></path>
+            </g>
+
+            <!-- PCB Socket Terminal Header Rails (4 Sides) -->
+            <!-- North Header Rail -->
+            <rect x="428" y="304" width="144" height="22" rx="4" fill="#061209" stroke="#00ff66" stroke-width="1.2" stroke-opacity="0.5"></rect>
+            <text x="500" y="296" fill="#00ff66" font-size="9" font-family="'Fredoka', monospace" font-weight="700" letter-spacing="1.5" text-anchor="middle" opacity="0.65">BUS-NORTH [PIN 01-06]</text>
+
+            <!-- East Header Rail -->
+            <rect x="674" y="428" width="22" height="144" rx="4" fill="#061209" stroke="#00ff66" stroke-width="1.2" stroke-opacity="0.5"></rect>
+            <text x="710" y="500" fill="#00ff66" font-size="9" font-family="'Fredoka', monospace" font-weight="700" letter-spacing="1.5" text-anchor="middle" transform="rotate(90 710 500)" opacity="0.65">BUS-EAST [PIN 07-12]</text>
+
+            <!-- South Header Rail -->
+            <rect x="428" y="674" width="144" height="22" rx="4" fill="#061209" stroke="#00ff66" stroke-width="1.2" stroke-opacity="0.5"></rect>
+            <text x="500" y="712" fill="#00ff66" font-size="9" font-family="'Fredoka', monospace" font-weight="700" letter-spacing="1.5" text-anchor="middle" opacity="0.65">BUS-SOUTH [PIN 13-18]</text>
+
+            <!-- West Header Rail -->
+            <rect x="304" y="428" width="22" height="144" rx="4" fill="#061209" stroke="#00ff66" stroke-width="1.2" stroke-opacity="0.5"></rect>
+            <text x="290" y="500" fill="#00ff66" font-size="9" font-family="'Fredoka', monospace" font-weight="700" letter-spacing="1.5" text-anchor="middle" transform="rotate(-90 290 500)" opacity="0.65">BUS-WEST [PIN 19-24]</text>
+
             <!-- Ocular Crosshair Ticks -->
             <g stroke="#00ff66" stroke-width="2.5" stroke-linecap="round" opacity="0.65" filter="url(#upgrade-glow)">
               <line x1="500" y1="262" x2="500" y2="285"></line>
@@ -378,99 +406,94 @@
   </footer>
 
   <script>
-    // Procedural Ben 10 Upgrade Galvanic Mechamorph Circuit Conduits (24 Circuits)
+    // Procedural Ben 10 Upgrade Galvanic Mechamorph Circuit Conduits (24 Circuits across 4 PCB Sides)
     const TOTAL_ROOTS = 24;
     const ROOT_CX = 500;
     const ROOT_CY = 500;
-    const ROOT_RADIUS = 186;
-
-    function pseudoRandom(seed) {
-      let s = seed;
-      return () => {
-        s = (s * 1664525 + 1013904223) % 4294967296;
-        return s / 4294967296;
-      };
-    }
+    const ROOT_RADIUS = 182;
 
     function makePath(points) {
       return `M ${points.map(p => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" L ")}`;
     }
 
     function generateCircuits() {
-      const rand = pseudoRandom(20260910);
       const circuits = [];
+      // 4 sides: 0: North, 1: East, 2: South, 3: West (6 pins per side = 24 total)
+      for (let side = 0; side < 4; side++) {
+        const baseAngle = side * (Math.PI / 2) - Math.PI / 2;
+        const normX = Math.cos(baseAngle);
+        const normY = Math.sin(baseAngle);
+        const tanX = -normY;
+        const tanY = normX;
 
-      for (let i = 0; i < TOTAL_ROOTS; i++) {
-        const baseAngle = (i / TOTAL_ROOTS) * Math.PI * 2 + (rand() - 0.5) * 0.06;
-        const cosA = Math.cos(baseAngle);
-        const sinA = Math.sin(baseAngle);
+        for (let pIdx = 0; pIdx < 6; pIdx++) {
+          const cIdx = side * 6 + pIdx;
+          // Spacing between pins along the side: 20px
+          const tOffset = (pIdx - 2.5) * 20;
 
-        const p0 = [ROOT_CX + cosA * ROOT_RADIUS, ROOT_CY + sinA * ROOT_RADIUS];
+          // Start pad p0 right on the button perimeter
+          const p0 = [ROOT_CX + normX * ROOT_RADIUS + tanX * tOffset, ROOT_CY + normY * ROOT_RADIUS + tanY * tOffset];
 
-        // Segment 1: Radial lead from ocular rim
-        const len1 = 38 + rand() * 42;
-        const p1 = [p0[0] + cosA * len1, p0[1] + sinA * len1];
+          // Lead-out straight from the pin socket pad
+          const leadLen = 22 + Math.abs(pIdx - 2.5) * 6;
+          const p1 = [p0[0] + normX * leadLen, p0[1] + normY * leadLen];
 
-        // Segment 2: 45-degree PCB elbow jog
-        const jogDir = (i % 2 === 0) ? 1 : -1;
-        const jogAngle = baseAngle + jogDir * (Math.PI / 4);
-        const len2 = 38 + rand() * 45;
-        const p2 = [p1[0] + Math.cos(jogAngle) * len2, p1[1] + Math.sin(jogAngle) * len2];
+          // 45 deg PCB fan-out
+          const fanDir = (pIdx >= 3) ? 1 : -1;
+          const fanDist = Math.abs(pIdx - 2.5);
+          const fanLen = 18 + fanDist * 22;
+          const f45X = (normX + fanDir * tanX) * 0.7071;
+          const f45Y = (normY + fanDir * tanY) * 0.7071;
+          const p2 = [p1[0] + f45X * fanLen, p1[1] + f45Y * fanLen];
 
-        // Segment 3: Outward run
-        const outAngle = baseAngle + jogDir * 0.12;
-        const len3 = 75 + rand() * 90;
-        const p3 = [p2[0] + Math.cos(outAngle) * len3, p2[1] + Math.sin(outAngle) * len3];
-
-        // Segment 4: Terminal jog
-        const jogAngle2 = outAngle - jogDir * (Math.PI / 4);
-        const len4 = 40 + rand() * 55;
-        let p4 = [p3[0] + Math.cos(jogAngle2) * len4, p3[1] + Math.sin(jogAngle2) * len4];
-
-        // Ensure within SVG canvas bounds
-        const d4 = Math.hypot(p4[0] - ROOT_CX, p4[1] - ROOT_CY);
-        if (d4 > 475) {
-          const factor = 475 / d4;
-          p4 = [ROOT_CX + (p4[0] - ROOT_CX) * factor, ROOT_CY + (p4[1] - ROOT_CY) * factor];
-        }
-
-        const spine = [p0, p1, p2, p3, p4];
-
-        // Generate branch traces
-        const branches = [{
-          points: spine,
-          isMain: true
-        }];
-
-        // Branch 1: splits at p2
-        const bAngle1 = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]) + (-jogDir) * (Math.PI / 4);
-        const bLen1 = 50 + rand() * 55;
-        let bp1 = [p2[0] + Math.cos(bAngle1) * bLen1, p2[1] + Math.sin(bAngle1) * bLen1];
-        let bp2 = [bp1[0] + Math.cos(baseAngle) * (40 + rand() * 40), bp1[1] + Math.sin(baseAngle) * (40 + rand() * 40)];
-        const dbp2 = Math.hypot(bp2[0] - ROOT_CX, bp2[1] - ROOT_CY);
-        if (dbp2 > 475) {
-          const f = 475 / dbp2;
-          bp2 = [ROOT_CX + (bp2[0] - ROOT_CX) * f, ROOT_CY + (bp2[1] - ROOT_CY) * f];
-        }
-        branches.push({
-          points: [p2, bp1, bp2],
-          isMain: false
-        });
-
-        // Optional secondary micro-branch
-        if (rand() > 0.35) {
-          const bAngle2 = baseAngle + jogDir * (Math.PI / 4);
-          let sub1 = [p3[0] + Math.cos(bAngle2) * 45, p3[1] + Math.sin(bAngle2) * 45];
-          const dsub = Math.hypot(sub1[0] - ROOT_CX, sub1[1] - ROOT_CY);
-          if (dsub < 475) {
-            branches.push({
-              points: [p3, sub1],
-              isMain: false
-            });
+          // Outward bus routing
+          let runDirX, runDirY, runLen;
+          if (pIdx === 0 || pIdx === 5) {
+            // Outermost pins route along the tangent into broad corners
+            runDirX = fanDir * tanX;
+            runDirY = fanDir * tanY;
+            runLen = 50 + (side % 2) * 20;
+          } else {
+            runDirX = normX;
+            runDirY = normY;
+            runLen = 70 + (pIdx % 3) * 30 + (cIdx % 4) * 15;
           }
-        }
+          const p3 = [p2[0] + runDirX * runLen, p2[1] + runDirY * runLen];
 
-        circuits.push(branches);
+          // Dogleg 45-degree chamfered turn
+          const d45X = (normX + fanDir * 0.5 * tanX) * 0.7071;
+          const d45Y = (normY + fanDir * 0.5 * tanY) * 0.7071;
+          const len4 = 65 + pIdx * 12;
+          const p4 = [p3[0] + d45X * len4, p3[1] + d45Y * len4];
+
+          // Terminal segment towards the outer edge
+          const len5 = 45 + (cIdx % 3) * 25;
+          const p5 = [p4[0] + normX * len5, p4[1] + normY * len5];
+
+          const spine = [p0, p1, p2, p3, p4];
+          const d5 = Math.hypot(p5[0] - ROOT_CX, p5[1] - ROOT_CY);
+          if (d5 < 475 && p5[0] > 25 && p5[0] < 975 && p5[1] > 25 && p5[1] < 975) {
+            spine.push(p5);
+          }
+
+          // Secondary branch trace
+          const bDir = (pIdx % 2 === 0) ? -fanDir : fanDir;
+          const bVecX = (normX + bDir * tanX) * 0.7071;
+          const bVecY = (normY + bDir * tanY) * 0.7071;
+          const bp1 = [p3[0] + bVecX * 40, p3[1] + bVecY * 40];
+          const bp2 = [bp1[0] + tanX * bDir * 45, bp1[1] + tanY * bDir * 45];
+
+          circuits.push({
+            side,
+            pIdx,
+            p0,
+            norm: [normX, normY],
+            tan: [tanX, tanY],
+            spine,
+            branch: [p3, bp1, bp2],
+            tp: [p2[0], p2[1]]
+          });
+        }
       }
       return circuits;
     }
@@ -492,19 +515,66 @@
       return order;
     }
 
-    // Build Upgrade Circuits SVG in DOM
+    // Build Upgrade Circuits SVG in DOM with PCB Socket Pads
     const generatedCircuits = generateCircuits();
     const goldenOrder = getGoldenIndexOrder();
     const rootsContainer = document.getElementById('roots-container');
 
-    generatedCircuits.forEach((branches, rootIdx) => {
+    generatedCircuits.forEach((c, rootIdx) => {
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.setAttribute('id', `root-group-${rootIdx}`);
       g.setAttribute('class', 'circuit-path');
       g.style.opacity = '0.07';
       g.style.transform = 'scale(0.92)';
 
-      branches.forEach((branch, bIdx) => {
+      // 1. Solder Pin Pad directly on the button perimeter
+      const p0 = c.p0;
+      const isVertSide = (c.side === 0 || c.side === 2); // North or South
+      const padW = isVertSide ? 10 : 22;
+      const padH = isVertSide ? 22 : 10;
+      const padX = p0[0] - padW / 2;
+      const padY = p0[1] - padH / 2;
+
+      // Contact Pad Base
+      const padBase = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      padBase.setAttribute('x', padX.toFixed(1));
+      padBase.setAttribute('y', padY.toFixed(1));
+      padBase.setAttribute('width', padW.toString());
+      padBase.setAttribute('height', padH.toString());
+      padBase.setAttribute('rx', '3');
+      padBase.setAttribute('fill', '#00ff66');
+      padBase.setAttribute('filter', 'url(#upgrade-glow)');
+      padBase.setAttribute('opacity', '0.9');
+      g.appendChild(padBase);
+
+      // Contact Pad Via Hole Drill
+      const padVia = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      padVia.setAttribute('cx', p0[0].toFixed(1));
+      padVia.setAttribute('cy', p0[1].toFixed(1));
+      padVia.setAttribute('r', '2.2');
+      padVia.setAttribute('fill', '#050a06');
+      padVia.setAttribute('stroke', '#ffffff');
+      padVia.setAttribute('stroke-width', '0.8');
+      g.appendChild(padVia);
+
+      // Bridge wire linking pad directly into the circular button rim
+      const bridge = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      bridge.setAttribute('x1', p0[0].toFixed(1));
+      bridge.setAttribute('y1', p0[1].toFixed(1));
+      bridge.setAttribute('x2', (p0[0] - c.norm[0] * 12).toFixed(1));
+      bridge.setAttribute('y2', (p0[1] - c.norm[1] * 12).toFixed(1));
+      bridge.setAttribute('stroke', '#00ff66');
+      bridge.setAttribute('stroke-width', '3');
+      bridge.setAttribute('stroke-linecap', 'round');
+      g.appendChild(bridge);
+
+      // 2. Main Spine Trace and Secondary Branch Trace
+      const traces = [
+        { points: c.spine, isMain: true },
+        { points: c.branch, isMain: false }
+      ];
+
+      traces.forEach((branch, bIdx) => {
         const pathData = makePath(branch.points);
         const lastPt = branch.points[branch.points.length - 1];
         const isMain = branch.isMain;
@@ -560,6 +630,23 @@
         nodeInner.setAttribute('fill', '#050a06');
         g.appendChild(nodeInner);
       });
+
+      // 3. Test Point Pad along the trace
+      const tpOuter = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      tpOuter.setAttribute('cx', c.tp[0].toFixed(1));
+      tpOuter.setAttribute('cy', c.tp[1].toFixed(1));
+      tpOuter.setAttribute('r', '4.5');
+      tpOuter.setAttribute('fill', 'none');
+      tpOuter.setAttribute('stroke', '#00ff66');
+      tpOuter.setAttribute('stroke-width', '1.5');
+      g.appendChild(tpOuter);
+
+      const tpInner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      tpInner.setAttribute('cx', c.tp[0].toFixed(1));
+      tpInner.setAttribute('cy', c.tp[1].toFixed(1));
+      tpInner.setAttribute('r', '1.8');
+      tpInner.setAttribute('fill', '#00ff66');
+      g.appendChild(tpInner);
 
       rootsContainer.appendChild(g);
     });

@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="assets/styles-Cc3jfXhB.css">
   <link rel="stylesheet" href="_external/fonts.googleapis.com/css2.family_Fredoka_wght_500_600_700_family_Patrick_Hand_display_swap.css">
   <style>
+    :root {
+      --reishi: #00ff66;
+      --reishi-deep: #003814;
+      --color-reishi: #00ff66;
+      --color-reishi-deep: #003814;
+      --upgrade-neon: #00ff66;
+      --upgrade-glow: rgba(0, 255, 102, 0.6);
+      --upgrade-bg: #070a08;
+    }
     body {
       background-color: var(--background, #FAF9F6);
       color: var(--foreground, #1B1B1B);
@@ -54,42 +63,171 @@
     .btn-ink:active {
       transform: translateY(1px);
     }
+    .btn-outline {
+      background: transparent;
+      color: var(--foreground, #1B1B1B);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 10px 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-outline:hover {
+      background: var(--secondary, #F4F2EB);
+    }
+    /* Upgrade Galvanic Mechamorph Stage Styling */
+    .stage-col {
+      background: radial-gradient(circle at 50% 50%, #0d1a10 0%, #060a07 70%, #020403 100%) !important;
+      border: 3px solid #00ff66 !important;
+      box-shadow: 4px 6px 0 0 #004d1a, 0 0 35px rgba(0, 255, 102, 0.25) !important;
+      position: relative;
+      overflow: hidden;
+    }
+    .stage-col::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(0, 255, 102, 0.12) 0%, transparent 65%),
+        linear-gradient(rgba(0, 255, 102, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 102, 0.05) 1px, transparent 1px);
+      background-size: 100% 100%, 36px 36px, 36px 36px;
+      pointer-events: none;
+    }
+    #roots-badge {
+      background: #0a190e !important;
+      color: #00ff66 !important;
+      border: 2px solid #00ff66 !important;
+      box-shadow: 0 0 14px rgba(0, 255, 102, 0.4) !important;
+      letter-spacing: 0.06em;
+    }
+    #btn-status-caption {
+      background: rgba(5, 12, 7, 0.95) !important;
+      color: #bbf7d0 !important;
+      border: 2px solid #00ff66 !important;
+      box-shadow: 0 0 16px rgba(0, 255, 102, 0.3) !important;
+    }
+    #progress-bar {
+      background-color: #00ff66 !important;
+      box-shadow: 0 0 12px rgba(0, 255, 102, 0.7);
+    }
+    @keyframes upgrade-flow {
+      from { stroke-dashoffset: 120; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes reticle-spin-cw {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes reticle-spin-ccw {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    .circuit-path {
+      transition: opacity 450ms ease, transform 650ms cubic-bezier(.16,.9,.28,1), filter 450ms ease;
+      transform-origin: 500px 500px;
+    }
+    .circuit-pulse {
+      animation: upgrade-flow 2s linear infinite;
+    }
     .root-path {
       transition: opacity 420ms ease, transform 820ms cubic-bezier(.16,.9,.28,1);
       transform-origin: 500px 500px;
     }
+    /* Desktop-first projector layout: QR | Button | Brochure columns */
+    .desk-stage { flex-direction: column; }
+    /* Reishi stage: square that fills its column (width-driven on mobile, height-driven on desktop) */
+    .stage-col > .stage-grid {
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 1;
+      height: auto;
+    }
+    @media (min-width: 700px) {
+      .desk-stage { flex-direction: row; align-items: stretch; }
+      .desk-stage > .qr-col { width: 360px; flex: 0 0 360px; align-self: center; }
+      .desk-stage > .stage-col { flex: 1 1 auto; min-width: 0; min-height: 0; }
+      .desk-stage > .brochure-col { width: 280px; flex: 0 0 280px; }
+      /* Fill the column height so the roots + button use the whole projector stage */
+      .stage-col > .stage-grid { width: auto; height: 100%; }
+    }
+    #brochure-panel { display: flex; }
+    #brochure-panel.hidden { display: none; }
+    .marquee-strip {
+      overflow: hidden;
+      white-space: nowrap;
+      background: var(--foreground, #1B1B1B);
+      color: var(--background, #FAF9F6);
+    }
+    .marquee-track {
+      display: inline-flex;
+      animation: marquee-scroll 24s linear infinite;
+      will-change: transform;
+    }
+    .marquee-track span {
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 6px 2.5rem 6px 2.5rem;
+    }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .float-name {
+      position: fixed;
+      bottom: -70px;
+      z-index: 40;
+      pointer-events: none;
+      font-family: 'Patrick Hand', cursive;
+      font-size: 1.35rem;
+      background: var(--card, #FFFFFF);
+      border: 2px solid var(--foreground, #1B1B1B);
+      border-radius: 9999px;
+      padding: 8px 20px;
+      box-shadow: 3px 4px 0 0 var(--foreground, #1B1B1B);
+      animation: float-name-rise 4.5s ease-out forwards;
+    }
+    @keyframes float-name-rise {
+      0%   { transform: translateY(0) rotate(-2deg); opacity: 0; }
+      8%   { opacity: 1; }
+      75%  { opacity: 1; }
+      100% { transform: translateY(-88vh) rotate(3deg); opacity: 0; }
+    }
   </style>
-</head>
-<body class="min-h-screen flex flex-col justify-between">
+</head>  <body class="min-h-screen flex flex-col">
   <!-- Top Header Banner -->
   <header class="border-b-2 border-foreground bg-foreground px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="w-24"></div>
     <img src="__l5e/assets-v1/634a551f-8685-4759-b46e-fdbe6a390438/tinkerhub-snmimt-banner.png" alt="TinkerHub SNMIMT" class="h-14 sm:h-18 w-auto object-contain">
-    <div class="w-24 flex justify-end">
-      <a href="admin.html" target="_blank" class="pill bg-card/20 text-card text-xs hover:bg-card/40 transition-colors border-card font-hand">
-        ⚙ Admin Panel
-      </a>
-    </div>
+    <div class="w-24"></div>
   </header>
 
+  <!-- Top Marquee Strip -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track" id="marquee-top-track"><span id="marquee-top-text">WELCOME TO USELESS PROJECTS 3.0 ✦ SCAN THE QR TO CHECK IN ✦ SNMIMT TINKERHUB</span><span id="marquee-top-text-dup">WELCOME TO USELESS PROJECTS 3.0 ✦ SCAN THE QR TO CHECK IN ✦ SNMIMT TINKERHUB</span></div>
+  </div>
+
   <!-- Main Display Stage -->
-  <main class="mx-auto grid max-w-[1400px] w-full gap-8 px-6 py-6 lg:grid-cols-[380px_1fr] items-center flex-1">
+  <main class="mx-auto flex w-full max-w-[1500px] min-h-0 flex-1 flex-col gap-6 px-6 py-6 desk-stage">
     
     <!-- Left Column: Scan QR Code & Live Registration Info -->
-    <section class="space-y-5">
+    <section class="qr-col space-y-5">
       <div class="panel p-6 text-center space-y-4">
         <div class="flex items-center justify-between">
           <span class="pill bg-tetris-yellow text-foreground text-xs">📲 Maker Check-in</span>
           <span id="live-indicator" class="pill text-xs bg-green-100 text-green-800">● Live Sync</span>
         </div>
 
-        <h2 class="font-display text-2xl leading-tight">Scan to Charge the Roots</h2>
-        <p class="font-hand text-muted-foreground text-sm">Scan with your phone to register your ticket & light the inauguration console</p>
+        <h2 class="font-display text-2xl leading-tight">Scan to Energize the Circuits</h2>
+        <p class="font-hand text-muted-foreground text-sm">Scan with your phone & enter your name to upgrade the console</p>
 
-        <!-- Dynamic High-Resolution QR Code -->
+        <!-- QR Code — served by THIS server (admin-uploaded or auto-generated) -->
         <div class="flex justify-center my-2">
           <div class="p-3 bg-[#FAF9F6] border-2 border-foreground rounded-2xl shadow-sm inline-block">
-            <img id="qr-img" src="" alt="Scan QR Code to Register" class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg">
+            <img id="qr-img" src="/api/qr" alt="Scan QR Code to Register" class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg">
+          </div>
           </div>
           <div class="mt-1 text-center">
             <a id="qr-url-text" href="/scan.html" target="_blank" class="font-mono text-xs text-muted-foreground hover:text-foreground underline break-all">/scan.html</a>
@@ -116,112 +254,135 @@
       </div>
     </section>
 
-    <!-- Right Column: 24 Reishi Roots & Big Red Button Stage -->
-    <section class="panel relative flex min-h-[72vh] flex-col items-center justify-center overflow-hidden p-6">
+    <!-- Right Column: Ben 10 Upgrade Galvanic Mechamorph Console Stage -->
+    <section class="panel stage-col relative flex min-h-[72vh] items-center justify-center p-6">
       <!-- Status Top Badges -->
-      <div class="absolute left-6 top-6 flex gap-2">
-        <span id="roots-badge" class="pill font-display">reishi: 0/24 roots</span>
-      </div>
-      <div class="absolute right-6 top-6 flex gap-2">
-        <span class="h-6 w-6 animate-float-soft rounded-full border-4 border-tetris-magenta bg-tetris-cyan"></span>
-        <span class="h-6 w-6 animate-float-soft rounded-full border-4 border-tetris-red bg-tetris-yellow"></span>
+      <div class="absolute left-6 top-6 flex flex-wrap gap-2 z-10">
+        <span id="roots-badge" class="pill font-display">UPGRADE: 0/24 CIRCUITS</span>
+        <span id="lock-badge" class="pill font-display bg-yellow-100 text-yellow-900" style="display:none">🔒 LOCKED</span>
       </div>
 
-      <!-- Center Reishi Roots SVG & Button -->
-      <div class="relative grid aspect-square w-full max-w-[620px] place-items-center">
-        <!-- Reishi SVG Canvas -->
+      <!-- Center Upgrade Galvanic Mechamorph SVG & Button Stage -->
+      <div class="stage-grid relative grid min-w-0 place-items-center">
         <div class="absolute inset-0 pointer-events-none">
-          <svg id="reishi-svg" viewBox="0 0 1000 1000" class="h-full w-full overflow-visible" aria-hidden="true">
+          <svg id="reishi-svg" viewBox="0 0 1000 1000" class="h-full w-full" aria-hidden="true">
             <defs>
-              <filter id="reishi-halo" x="-60%" y="-60%" width="220%" height="220%">
-                <feGaussianBlur stdDeviation="12" result="b"></feGaussianBlur>
+              <filter id="upgrade-halo" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="8" result="blur"></feGaussianBlur>
                 <feMerge>
-                  <feMergeNode in="b"></feMergeNode>
+                  <feMergeNode in="blur"></feMergeNode>
                   <feMergeNode in="SourceGraphic"></feMergeNode>
                 </feMerge>
               </filter>
-              <filter id="reishi-core-glow" x="-60%" y="-60%" width="220%" height="220%">
-                <feGaussianBlur stdDeviation="5" result="b"></feGaussianBlur>
+              <filter id="upgrade-glow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="4" result="blur"></feGaussianBlur>
                 <feMerge>
-                  <feMergeNode in="b"></feMergeNode>
+                  <feMergeNode in="blur"></feMergeNode>
                   <feMergeNode in="SourceGraphic"></feMergeNode>
                 </feMerge>
               </filter>
-              <radialGradient id="reishi-belt" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="var(--color-reishi)"></stop>
-                <stop offset="45%" stop-color="var(--color-reishi)"></stop>
-                <stop offset="100%" stop-color="var(--color-reishi-deep)"></stop>
+              <radialGradient id="upgrade-core-grad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#00ff66" stop-opacity="0.85"></stop>
+                <stop offset="35%" stop-color="#00dd55" stop-opacity="0.45"></stop>
+                <stop offset="70%" stop-color="#003814" stop-opacity="0.2"></stop>
+                <stop offset="100%" stop-color="#000000" stop-opacity="0"></stop>
               </radialGradient>
-              <radialGradient id="reishi-core" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"></stop>
-                <stop offset="60%" stop-color="var(--color-reishi)" stop-opacity="0.35"></stop>
-                <stop offset="100%" stop-color="var(--color-reishi-deep)" stop-opacity="0"></stop>
+              <radialGradient id="upgrade-reticle-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#00ff66" stop-opacity="0.9"></stop>
+                <stop offset="60%" stop-color="#00aa44" stop-opacity="0.3"></stop>
+                <stop offset="100%" stop-color="#00220d" stop-opacity="0"></stop>
               </radialGradient>
             </defs>
 
-            <!-- Background Pulsing Core Circles -->
-            <circle id="reishi-core-circle" cx="500" cy="500" r="280" fill="url(#reishi-core)" style="opacity: 0.12; transition: opacity 700ms ease;"></circle>
-            <circle id="reishi-halo-circle" cx="500" cy="500" r="182" fill="none" stroke="var(--color-reishi)" stroke-width="5" filter="url(#reishi-halo)" style="opacity: 0.18; transition: opacity 500ms ease, stroke-width 400ms ease;"></circle>
-            <circle id="reishi-flow-circle" cx="500" cy="500" r="182" fill="none" stroke="#ffffff" stroke-width="1.4" stroke-dasharray="14 22" style="opacity: 0.15; animation: reishi-flow 3.4s linear infinite;"></circle>
+            <!-- Upgrade Ambient Ocular Glow -->
+            <circle id="reishi-core-circle" cx="500" cy="500" r="320" fill="url(#upgrade-core-grad)" style="opacity: 0.18; transition: opacity 700ms ease;"></circle>
+            
+            <!-- Upgrade Galvanic Mechamorph Concentric Eye Rings & Reticle -->
+            <circle cx="500" cy="500" r="245" fill="none" stroke="#00ff66" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="12 8 3 8"></circle>
+            <circle id="upgrade-reticle-outer" cx="500" cy="500" r="222" fill="none" stroke="#00ff66" stroke-width="2.5" stroke-dasharray="38 18 10 18" filter="url(#upgrade-glow)" style="transform-origin: 500px 500px; animation: reticle-spin-cw 28s linear infinite; opacity: 0.8;"></circle>
+            <circle id="upgrade-reticle-inner" cx="500" cy="500" r="202" fill="none" stroke="#55ffa8" stroke-width="1.8" stroke-dasharray="6 14" filter="url(#upgrade-glow)" style="transform-origin: 500px 500px; animation: reticle-spin-ccw 18s linear infinite; opacity: 0.75;"></circle>
+            
+            <!-- Ocular Crosshair Ticks -->
+            <g stroke="#00ff66" stroke-width="2.5" stroke-linecap="round" opacity="0.65" filter="url(#upgrade-glow)">
+              <line x1="500" y1="262" x2="500" y2="285"></line>
+              <line x1="500" y1="715" x2="500" y2="738"></line>
+              <line x1="262" y1="500" x2="285" y2="500"></line>
+              <line x1="715" y1="500" x2="738" y2="500"></line>
+            </g>
 
-            <!-- Root SVG Groups Container -->
+            <!-- Eye Housing Frame Rings -->
+            <circle id="reishi-halo-circle" cx="500" cy="500" r="182" fill="none" stroke="#00ff66" stroke-width="5" filter="url(#upgrade-halo)" style="opacity: 0.35; transition: opacity 500ms ease, stroke-width 400ms ease;"></circle>
+            <circle id="reishi-flow-circle" cx="500" cy="500" r="182" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-dasharray="16 22" style="opacity: 0.45; animation: upgrade-flow 2.8s linear infinite;"></circle>
+
+            <!-- Circuit Conduits Container -->
             <g id="roots-container"></g>
           </svg>
         </div>
 
-        <!-- Big Red Inauguration Button -->
+        <!-- Upgrade Central Core Button -->
         <div class="relative z-10 flex flex-col items-center">
           <div class="relative">
             <!-- Shockwave ripple when armed -->
-            <span id="btn-shockwave" class="hidden absolute inset-0 rounded-full bg-btn-red/25" style="animation: shockwave 2.4s ease-out infinite"></span>
+            <span id="btn-shockwave" class="hidden absolute inset-0 rounded-full bg-[#00ff66]/30" style="animation: shockwave 2.2s ease-out infinite"></span>
             
-            <div class="relative grid h-56 w-56 place-items-center rounded-full border-4 border-foreground bg-secondary shadow-[8px_10px_0_0_var(--color-foreground)]">
-              <button id="inauguration-btn" type="button" disabled aria-label="Inauguration button" class="group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25" style="box-shadow: 0 8px 0 0 color-mix(in oklab, var(--color-btn-red-dark) 35%, transparent);">
-                <span id="btn-label" class="font-display text-center text-lg leading-tight tracking-widest text-foreground/40">PRESS</span>
+            <div class="relative grid h-56 w-56 place-items-center rounded-full border-4 border-[#00ff66] bg-[#070d09] shadow-[0_0_30px_rgba(0,255,102,0.35),inset_0_0_20px_rgba(0,255,102,0.2)]">
+              <button id="inauguration-btn" type="button" disabled aria-label="Inauguration button" class="group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00ff66]/40 transition-all duration-200 cursor-not-allowed bg-[#00ff66]/15" style="box-shadow: 0 8px 0 0 rgba(0, 77, 26, 0.4);">
+                <span id="btn-label" class="font-display text-center text-lg leading-tight tracking-widest text-[#00ff66]/50">UPGRADE</span>
               </button>
             </div>
           </div>
 
-          <p id="btn-status-caption" class="absolute -bottom-16 left-1/2 w-max max-w-[80vw] -translate-x-1/2 rounded-full border-2 border-foreground bg-card/95 px-5 py-1.5 text-center font-hand text-base text-muted-foreground shadow-sm">
-            button stays cold until every root drinks reishi
+          <p id="btn-status-caption" class="absolute -bottom-16 left-1/2 w-max max-w-[80vw] -translate-x-1/2 rounded-full px-5 py-1.5 text-center font-display text-base shadow-sm">
+            system unupgraded until all 24 circuits connect
           </p>
         </div>
       </div>
+
     </section>
+
+    <!-- Brochure / Menu Slideshow — independent right column (like the QR column) -->
+    <aside id="brochure-panel" class="panel brochure-col hidden min-h-[420px] flex-col items-center justify-center gap-3">
+      <span class="pill font-display text-xs bg-tetris-cyan">📜 Menu / Brochure</span>
+      <div id="brochure-stage" class="flex-1 w-full flex items-center justify-center overflow-hidden rounded-xl border-2 border-foreground bg-card min-h-[320px]"></div>
+      <p id="brochure-caption" class="font-hand text-xs text-muted-foreground text-center"></p>
+    </aside>
   </main>
 
   <!-- Celebration Modal (GPU Canvas Particles - Zero Lag) -->
-  <div id="celebration-modal" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center overflow-hidden bg-background/95 backdrop-blur-md px-6 text-center animate-stamp-in">
-    <canvas id="confetti-canvas" class="pointer-events-none absolute inset-0 h-full w-full"></canvas>
-    
-    <div class="relative z-10 flex max-w-2xl flex-col items-center">
-      <img src="__l5e/assets-v1/b3f5291b-4d5e-4635-a21e-c1beb140f910/useless-projects-3.png" alt="Useless Projects 3.0" class="w-[min(480px,85vw)] drop-shadow-[0_12px_0_rgba(0,0,0,0.12)]">
-      
-      <h1 class="mt-8 font-display text-4xl sm:text-6xl text-foreground tracking-tight">WELCOME TO USELESS PROJECTS 3.0!</h1>
-      <p class="mt-4 font-display text-2xl sm:text-3xl text-tetris-orange uppercase tracking-wider">LET'S START THE CHAOS!</p>
-      
-      <div class="mt-6 space-y-2 font-hand text-xl text-muted-foreground">
-        <p><span id="modal-maker-count" class="font-bold text-foreground font-display text-2xl">32</span> makers scanned in. Pointless building activated.</p>
-        <p class="text-base">SNMIMT TinkerHub × Useless Projects 3.0</p>
-      </div>
+  <!-- Floating check-in names overlay -->
+  <div id="float-names-layer" class="pointer-events-none fixed inset-0 z-40"></div>
 
-      <button id="modal-close-btn" type="button" class="btn-ink mt-8 px-8 py-3 text-lg cursor-pointer hover:scale-105 active:scale-95 transition-transform">
-        Back to Console
-      </button>
+  <!-- Bottom Marquee Strip -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track" id="marquee-bottom-track"><span id="marquee-bottom-text">BUILT WITH ♥ AT SNMIMT ✦ USELESS PROJECTS 3.0 ✦ LET'S START THE CHAOS</span><span id="marquee-bottom-text-dup">BUILT WITH ♥ AT SNMIMT ✦ USELESS PROJECTS 3.0 ✦ LET'S START THE CHAOS</span></div>
+  </div>
+
+  <!-- Secret Admin Gate (footer heart × 5) -->
+  <div id="secret-admin-overlay" class="fixed inset-0 z-[60] hidden place-items-center bg-background/95 backdrop-blur-md">
+    <div class="panel p-8 w-full max-w-sm text-center space-y-4">
+      <h2 class="font-display text-2xl">Admin Access</h2>
+      <p class="font-hand text-sm text-muted-foreground">Enter the admin password</p>
+      <input id="admin-password-input" type="password" placeholder="Password" autocomplete="off"
+             class="w-full rounded-xl border-2 border-foreground bg-card p-3 text-center font-display tracking-widest outline-none">
+      <p id="admin-gate-error" class="font-hand text-sm text-btn-red hidden">Wrong password</p>
+      <div class="flex gap-2 justify-center">
+        <button id="admin-gate-cancel" class="btn-outline px-4 py-2 text-sm">Cancel</button>
+        <button id="admin-gate-enter" class="btn-ink px-6 py-2 text-sm">Unlock →</button>
+      </div>
     </div>
   </div>
 
   <!-- Footer -->
   <footer class="px-6 py-4 text-center font-hand text-sm text-muted-foreground border-t border-border/40">
-    built with <span class="text-btn-red">♥</span> for the snmimt tinkerhub campus community
+    built with <span id="secret-heart" class="text-btn-red cursor-pointer select-none" title="">♥</span> for the snmimt tinkerhub campus community
   </footer>
 
   <script>
-    // Procedural Reishi Roots Generator (24 Roots)
+    // Procedural Ben 10 Upgrade Galvanic Mechamorph Circuit Conduits (24 Circuits)
     const TOTAL_ROOTS = 24;
     const ROOT_CX = 500;
-    const ROOT_RADIUS = 196;
-    const ROOT_MAX_LEN = 900;
+    const ROOT_CY = 500;
+    const ROOT_RADIUS = 186;
 
     function pseudoRandom(seed) {
       let s = seed;
@@ -231,75 +392,87 @@
       };
     }
 
-    function makeRibbonPath(points, startW, endW) {
-      let left = [], right = [];
-      for (let i = 0; i < points.length; i++) {
-        let p = points[i];
-        let prev = points[Math.max(0, i - 1)];
-        let next = points[Math.min(points.length - 1, i + 1)];
-        let dx = next[0] - prev[0];
-        let dy = next[1] - prev[1];
-        let len = Math.hypot(dx, dy) || 1;
-        let nx = -dy / len;
-        let ny = dx / len;
-        let t = i / (points.length - 1);
-        let halfW = (startW + (endW - startW) * t) / 2;
-        left.push(`${(p[0] + nx * halfW).toFixed(1)} ${(p[1] + ny * halfW).toFixed(1)}`);
-        right.unshift(`${(p[0] - nx * halfW).toFixed(1)} ${(p[1] - ny * halfW).toFixed(1)}`);
-      }
-      return `M ${left.join(" L ")} L ${right.join(" L ")} Z`;
-    }
-
-    function makeCorePath(points) {
+    function makePath(points) {
       return `M ${points.map(p => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" L ")}`;
     }
 
-    function generateSpine(rand, origin, angle, length, segments, curl) {
-      let pts = [origin];
-      let x = origin[0], y = origin[1];
-      let curAngle = angle;
-      let segLen = length / segments;
-      for (let i = 0; i < segments; i++) {
-        curAngle += (rand() - 0.5) * curl;
-        curAngle = curAngle * 0.82 + angle * 0.18;
-        x += Math.cos(curAngle) * segLen;
-        y += Math.sin(curAngle) * segLen;
-        pts.push([x, y]);
-      }
-      return pts;
-    }
+    function generateCircuits() {
+      const rand = pseudoRandom(20260910);
+      const circuits = [];
 
-    function generateRoots() {
-      let rand = pseudoRandom(20260910);
-      let roots = [];
       for (let i = 0; i < TOTAL_ROOTS; i++) {
-        let baseAngle = (i / TOTAL_ROOTS) * Math.PI * 2 + (rand() - 0.5) * 0.12;
-        let origin = [ROOT_CX + Math.cos(baseAngle) * ROOT_RADIUS, ROOT_CX + Math.sin(baseAngle) * ROOT_RADIUS];
-        let len = ROOT_MAX_LEN * (0.55 + rand() * 0.45);
-        let w = 16 + rand() * 14;
-        let spine = generateSpine(rand, origin, baseAngle, len, 5 + Math.floor(rand() * 3), 0.9);
-        let branches = [{
-          ribbon: makeRibbonPath(spine, w, w * 0.18),
-          core: makeCorePath(spine),
-          coreWidth: w * 0.24
-        }];
-        let subBranches = 2 + Math.floor(rand() * 2);
-        for (let j = 0; j < subBranches; j++) {
-          let idx = 1 + Math.floor(rand() * (spine.length - 2));
-          let pt = spine[idx];
-          let prev = spine[idx - 1];
-          let bAngle = Math.atan2(pt[1] - prev[1], pt[0] - prev[0]) + (rand() > 0.5 ? 1 : -1) * (0.45 + rand() * 0.5);
-          let bW = w * (0.32 + rand() * 0.28);
-          let bSpine = generateSpine(rand, pt, bAngle, len * (0.3 + rand() * 0.35), 4, 1.1);
-          branches.push({
-            ribbon: makeRibbonPath(bSpine, bW, bW * 0.15),
-            core: makeCorePath(bSpine),
-            coreWidth: bW * 0.28
-          });
+        const baseAngle = (i / TOTAL_ROOTS) * Math.PI * 2 + (rand() - 0.5) * 0.06;
+        const cosA = Math.cos(baseAngle);
+        const sinA = Math.sin(baseAngle);
+
+        const p0 = [ROOT_CX + cosA * ROOT_RADIUS, ROOT_CY + sinA * ROOT_RADIUS];
+
+        // Segment 1: Radial lead from ocular rim
+        const len1 = 38 + rand() * 42;
+        const p1 = [p0[0] + cosA * len1, p0[1] + sinA * len1];
+
+        // Segment 2: 45-degree PCB elbow jog
+        const jogDir = (i % 2 === 0) ? 1 : -1;
+        const jogAngle = baseAngle + jogDir * (Math.PI / 4);
+        const len2 = 38 + rand() * 45;
+        const p2 = [p1[0] + Math.cos(jogAngle) * len2, p1[1] + Math.sin(jogAngle) * len2];
+
+        // Segment 3: Outward run
+        const outAngle = baseAngle + jogDir * 0.12;
+        const len3 = 75 + rand() * 90;
+        const p3 = [p2[0] + Math.cos(outAngle) * len3, p2[1] + Math.sin(outAngle) * len3];
+
+        // Segment 4: Terminal jog
+        const jogAngle2 = outAngle - jogDir * (Math.PI / 4);
+        const len4 = 40 + rand() * 55;
+        let p4 = [p3[0] + Math.cos(jogAngle2) * len4, p3[1] + Math.sin(jogAngle2) * len4];
+
+        // Ensure within SVG canvas bounds
+        const d4 = Math.hypot(p4[0] - ROOT_CX, p4[1] - ROOT_CY);
+        if (d4 > 475) {
+          const factor = 475 / d4;
+          p4 = [ROOT_CX + (p4[0] - ROOT_CX) * factor, ROOT_CY + (p4[1] - ROOT_CY) * factor];
         }
-        roots.push(branches);
+
+        const spine = [p0, p1, p2, p3, p4];
+
+        // Generate branch traces
+        const branches = [{
+          points: spine,
+          isMain: true
+        }];
+
+        // Branch 1: splits at p2
+        const bAngle1 = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]) + (-jogDir) * (Math.PI / 4);
+        const bLen1 = 50 + rand() * 55;
+        let bp1 = [p2[0] + Math.cos(bAngle1) * bLen1, p2[1] + Math.sin(bAngle1) * bLen1];
+        let bp2 = [bp1[0] + Math.cos(baseAngle) * (40 + rand() * 40), bp1[1] + Math.sin(baseAngle) * (40 + rand() * 40)];
+        const dbp2 = Math.hypot(bp2[0] - ROOT_CX, bp2[1] - ROOT_CY);
+        if (dbp2 > 475) {
+          const f = 475 / dbp2;
+          bp2 = [ROOT_CX + (bp2[0] - ROOT_CX) * f, ROOT_CY + (bp2[1] - ROOT_CY) * f];
+        }
+        branches.push({
+          points: [p2, bp1, bp2],
+          isMain: false
+        });
+
+        // Optional secondary micro-branch
+        if (rand() > 0.35) {
+          const bAngle2 = baseAngle + jogDir * (Math.PI / 4);
+          let sub1 = [p3[0] + Math.cos(bAngle2) * 45, p3[1] + Math.sin(bAngle2) * 45];
+          const dsub = Math.hypot(sub1[0] - ROOT_CX, sub1[1] - ROOT_CY);
+          if (dsub < 475) {
+            branches.push({
+              points: [p3, sub1],
+              isMain: false
+            });
+          }
+        }
+
+        circuits.push(branches);
       }
-      return roots;
+      return circuits;
     }
 
     function getGoldenIndexOrder() {
@@ -319,61 +492,161 @@
       return order;
     }
 
-    // Build Reishi Roots SVG in DOM
-    const generatedRoots = generateRoots();
+    // Build Upgrade Circuits SVG in DOM
+    const generatedCircuits = generateCircuits();
     const goldenOrder = getGoldenIndexOrder();
     const rootsContainer = document.getElementById('roots-container');
 
-    generatedRoots.forEach((branches, rootIdx) => {
+    generatedCircuits.forEach((branches, rootIdx) => {
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.setAttribute('id', `root-group-${rootIdx}`);
-      g.setAttribute('class', 'root-path');
-      g.style.opacity = '0';
-      g.style.transform = 'scale(0.35)';
+      g.setAttribute('class', 'circuit-path');
+      g.style.opacity = '0.07';
+      g.style.transform = 'scale(0.92)';
 
-      branches.forEach((b, bIdx) => {
-        const bgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        bgPath.setAttribute('d', b.ribbon);
-        bgPath.setAttribute('fill', 'url(#reishi-belt)');
-        bgPath.setAttribute('filter', 'url(#reishi-halo)');
-        bgPath.setAttribute('opacity', '0.92');
-        g.appendChild(bgPath);
+      branches.forEach((branch, bIdx) => {
+        const pathData = makePath(branch.points);
+        const lastPt = branch.points[branch.points.length - 1];
+        const isMain = branch.isMain;
 
-        const corePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        corePath.setAttribute('d', b.core);
-        corePath.setAttribute('fill', 'none');
-        corePath.setAttribute('stroke', '#ffffff');
-        corePath.setAttribute('stroke-width', b.coreWidth);
-        corePath.setAttribute('stroke-linecap', 'round');
-        corePath.setAttribute('stroke-linejoin', 'round');
-        corePath.setAttribute('opacity', '0.85');
-        g.appendChild(corePath);
+        // Base glow track
+        const baseTrack = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        baseTrack.setAttribute('d', pathData);
+        baseTrack.setAttribute('fill', 'none');
+        baseTrack.setAttribute('stroke', '#00ff66');
+        baseTrack.setAttribute('stroke-width', isMain ? '5.5' : '3.5');
+        baseTrack.setAttribute('stroke-linecap', 'round');
+        baseTrack.setAttribute('stroke-linejoin', 'round');
+        baseTrack.setAttribute('filter', 'url(#upgrade-glow)');
+        baseTrack.setAttribute('opacity', '0.7');
+        g.appendChild(baseTrack);
 
-        const flowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        flowPath.setAttribute('d', b.core);
-        flowPath.setAttribute('fill', 'none');
-        flowPath.setAttribute('stroke', '#ffffff');
-        flowPath.setAttribute('stroke-width', b.coreWidth * 0.7);
-        flowPath.setAttribute('stroke-linecap', 'round');
-        flowPath.setAttribute('stroke-dasharray', '10 90');
-        flowPath.style.animation = `reishi-flow ${1.5 + ((rootIdx + bIdx) % 5) * 0.3}s linear infinite`;
-        flowPath.style.opacity = '0.9';
-        g.appendChild(flowPath);
+        // Core conductor track
+        const coreTrack = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        coreTrack.setAttribute('d', pathData);
+        coreTrack.setAttribute('fill', 'none');
+        coreTrack.setAttribute('stroke', '#d1fae5');
+        coreTrack.setAttribute('stroke-width', isMain ? '2' : '1.2');
+        coreTrack.setAttribute('stroke-linecap', 'round');
+        coreTrack.setAttribute('stroke-linejoin', 'round');
+        coreTrack.setAttribute('opacity', '0.9');
+        g.appendChild(coreTrack);
+
+        // Flowing energy electron surge
+        const flowTrack = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        flowTrack.setAttribute('d', pathData);
+        flowTrack.setAttribute('fill', 'none');
+        flowTrack.setAttribute('stroke', '#ffffff');
+        flowTrack.setAttribute('stroke-width', isMain ? '2.4' : '1.5');
+        flowTrack.setAttribute('stroke-linecap', 'round');
+        flowTrack.setAttribute('stroke-dasharray', '12 85');
+        flowTrack.setAttribute('class', 'circuit-pulse');
+        flowTrack.style.animation = `upgrade-flow ${1.4 + ((rootIdx + bIdx) % 4) * 0.25}s linear infinite`;
+        g.appendChild(flowTrack);
+
+        // Terminal solder pad (node) at trace end
+        const nodeOuter = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        nodeOuter.setAttribute('cx', lastPt[0].toFixed(1));
+        nodeOuter.setAttribute('cy', lastPt[1].toFixed(1));
+        nodeOuter.setAttribute('r', isMain ? '6.5' : '4.5');
+        nodeOuter.setAttribute('fill', '#00ff66');
+        nodeOuter.setAttribute('filter', 'url(#upgrade-glow)');
+        g.appendChild(nodeOuter);
+
+        const nodeInner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        nodeInner.setAttribute('cx', lastPt[0].toFixed(1));
+        nodeInner.setAttribute('cy', lastPt[1].toFixed(1));
+        nodeInner.setAttribute('r', isMain ? '2.8' : '1.8');
+        nodeInner.setAttribute('fill', '#050a06');
+        g.appendChild(nodeInner);
       });
 
       rootsContainer.appendChild(g);
     });
 
-    // Set QR code dynamic link function
+    // QR image comes from our own server (/api/qr) — either the admin-uploaded
+    // custom QR or an auto-generated one for the current public URL.
     function updateQRCode(s) {
-      const base = s.publicUrl || window.location.origin;
+      const base = (s && s.publicUrl) || window.location.origin;
       const scanPortalUrl = `${base}/scan.html`;
-      document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(scanPortalUrl)}&bgcolor=FAF9F6&color=1B1B1B&margin=1`;
+      const img = document.getElementById('qr-img');
+      const wanted = `/api/qr?t=${qrStamp}`;
+      if (!img.src.endsWith(wanted)) img.src = wanted;
       const linkEl = document.getElementById('qr-url-text');
       if (linkEl) {
         linkEl.textContent = scanPortalUrl;
         linkEl.href = scanPortalUrl;
       }
+    }
+
+    // ----- Marquee strips (editable from admin) -----
+    function updateMarquees(s) {
+      if (!s) return;
+      const pairs = [
+        ['marquee-top-text', 'marquee-top-text-dup', s.marqueeTop],
+        ['marquee-bottom-text', 'marquee-bottom-text-dup', s.marqueeBottom]
+      ];
+      for (const [id, dupId, text] of pairs) {
+        if (!text) continue;
+        const el = document.getElementById(id);
+        if (el && el.textContent !== text) {
+          el.textContent = text;
+          const dup = document.getElementById(dupId);
+          if (dup) dup.textContent = text;
+        }
+      }
+    }
+
+    // ----- Floating check-in names -----
+    function showFloatingName(name) {
+      if (!name) return;
+      const layer = document.getElementById('float-names-layer');
+      if (!layer) return;
+      const el = document.createElement('div');
+      el.className = 'float-name';
+      el.textContent = `🎉 ${name} checked in!`;
+      el.style.left = (10 + Math.random() * 65) + 'vw';
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 4800);
+    }
+
+    // ----- Brochure / Menu Slideshow (right of the button) -----
+    let brochureStamp = Date.now();
+    let brochureIdx = 0;
+    let brochureCount = 0;
+    let brochureTimer = null;
+
+    function updateBrochure(state) {
+      const panel = document.getElementById('brochure-panel');
+      const stage = document.getElementById('brochure-stage');
+      const caption = document.getElementById('brochure-caption');
+      const info = (state && state.brochure) || { count: 0 };
+      const n = info.count || 0;
+
+      if (!n) {
+        panel.classList.add('hidden');
+        stage.innerHTML = '<p class="font-hand text-sm text-muted-foreground p-6 text-center">Menu / brochure will appear here once the admin uploads it.</p>';
+        caption.textContent = '';
+        if (brochureTimer) { clearInterval(brochureTimer); brochureTimer = null; }
+        brochureCount = 0;
+        return;
+      }
+
+      const changed = n !== brochureCount;
+      panel.classList.remove('hidden');
+      brochureCount = n;
+      if (changed) brochureIdx = 0;
+
+      function show() {
+        const i = brochureIdx % n;
+        stage.innerHTML = `<img src="/api/brochure?i=${i}&t=${brochureStamp}" class="max-h-full max-w-full object-contain rounded-lg" alt="Brochure page ${i + 1}">`;
+        caption.textContent = n > 1 ? `page ${i + 1} / ${n}` : (info.names && info.names[i] ? info.names[i] : '');
+        brochureIdx = (brochureIdx + 1) % n;
+      }
+      show();
+
+      if (brochureTimer) clearInterval(brochureTimer);
+      brochureTimer = n > 1 ? setInterval(show, 4000) : null;
     }
 
     // State Management & Real-Time Sync
@@ -383,6 +656,7 @@
       fired: false,
       attendees: []
     };
+    let qrStamp = Date.now();
 
     function updateStateUI(s) {
       if (s) updateQRCode(s);
@@ -397,24 +671,35 @@
       document.getElementById('count-num').textContent = count;
       document.getElementById('target-num').textContent = ` / ${target}`;
       document.getElementById('progress-bar').style.width = `${Math.min(100, Math.round(fillRatio * 100))}%`;
-      document.getElementById('roots-badge').textContent = isArmed ? 'reishi: full' : `reishi: ${rootsLit}/24 roots`;
+      document.getElementById('roots-badge').textContent = isArmed ? 'UPGRADE: ARMED ⚡' : `UPGRADE: ${rootsLit}/24 CIRCUITS`;
 
       // Update SVG Glow
-      document.getElementById('reishi-core-circle').style.opacity = (0.12 + fillRatio * 0.8).toString();
+      document.getElementById('reishi-core-circle').style.opacity = (0.18 + fillRatio * 0.82).toString();
       const haloCircle = document.getElementById('reishi-halo-circle');
-      haloCircle.style.opacity = (0.18 + fillRatio * 0.82).toString();
+      haloCircle.style.opacity = (0.35 + fillRatio * 0.65).toString();
       haloCircle.setAttribute('stroke-width', isArmed ? '8' : '5');
-      document.getElementById('reishi-flow-circle').style.opacity = (0.15 + fillRatio * 0.7).toString();
+      document.getElementById('reishi-flow-circle').style.opacity = (0.4 + fillRatio * 0.6).toString();
 
-      // Update 24 Roots Lit
+      // Update 24 Circuits Lit
       for (let i = 0; i < TOTAL_ROOTS; i++) {
         const rootEl = document.getElementById(`root-group-${i}`);
         const lit = (goldenOrder[i] ?? i) < rootsLit;
         if (rootEl) {
-          rootEl.style.opacity = lit ? '1' : '0';
-          rootEl.style.transform = lit ? 'scale(1)' : 'scale(0.35)';
+          rootEl.style.opacity = lit ? '1' : '0.07';
+          rootEl.style.transform = lit ? 'scale(1)' : 'scale(0.92)';
+          rootEl.style.filter = lit ? 'drop-shadow(0 0 8px #00ff66)' : 'none';
         }
       }
+
+      // Update marquee texts
+      updateMarquees(s);
+
+      // Update lock badge
+      const lockBadge = document.getElementById('lock-badge');
+      if (lockBadge) lockBadge.style.display = s.buttonLocked ? 'inline-flex' : 'none';
+
+      // Update Brochure Slideshow
+      updateBrochure(s);
 
       // Update Button State
       const btn = document.getElementById('inauguration-btn');
@@ -424,38 +709,46 @@
 
       if (s.fired) {
         btn.disabled = true;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red";
-        label.textContent = "LIVE";
-        label.className = "font-display text-center text-lg leading-tight tracking-widest text-primary-foreground";
-        caption.textContent = "reishi released. useless projects 3.0 is live <3";
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00ff66] transition-all duration-200 cursor-not-allowed bg-[#00ff66]";
+        btn.style.boxShadow = "0 0 45px #00ff66, inset 0 0 20px rgba(255,255,255,0.7)";
+        label.textContent = "UPGRADED";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#050a06] font-extrabold";
+        caption.innerHTML = '⚡ SYSTEM FULLY UPGRADED! Useless Projects 3.0 is live 💚 &middot; <a class="underline font-bold text-[#00ff66]" href="/celebration.html">open celebration page →</a>';
         shockwave.classList.add('hidden');
-        showCelebrationModal(count);
+        // Stay on the console — the celebration page is opt-in via the link above.
+        // (Auto-redirecting here yanked the projector off the main screen on load.)
+      } else if (s.buttonLocked) {
+        btn.disabled = true;
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-yellow-500/40 transition-all duration-200 cursor-not-allowed bg-yellow-500/20";
+        btn.style.boxShadow = "0 8px 0 0 rgba(161, 98, 7, 0.4)";
+        label.textContent = "LOCKED";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-yellow-500/70";
+        caption.textContent = "🔒 button is locked by the admin";
+        shockwave.classList.add('hidden');
       } else if (s.paused) {
         btn.disabled = true;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00ff66]/30 transition-all duration-200 cursor-not-allowed bg-[#00ff66]/10";
         label.textContent = "PAUSED";
-        label.className = "font-display text-center text-lg leading-tight tracking-widest text-foreground/40";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#00ff66]/40";
         caption.textContent = "system is paused by admin";
         shockwave.classList.add('hidden');
-        hideCelebrationModal();
       } else if (isArmed) {
         btn.disabled = false;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-pointer bg-btn-red animate-btn-breathe active:translate-y-2 active:shadow-[0_2px_0_0_var(--color-btn-red-dark)]";
-        btn.style.boxShadow = "0 10px 0 0 var(--color-btn-red-dark), inset 0 -8px 18px rgba(0,0,0,.25)";
-        label.textContent = "PRESS";
-        label.className = "font-display text-center text-lg leading-tight tracking-widest text-primary-foreground";
-        caption.textContent = "all roots are lit — the button is hot. press it.";
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00ff66] transition-all duration-200 cursor-pointer bg-[#00ff66] animate-btn-breathe active:translate-y-2";
+        btn.style.boxShadow = "0 0 40px #00ff66, 0 8px 0 0 #008833, inset 0 -6px 14px rgba(0,0,0,.3)";
+        label.textContent = "UPGRADE";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#050a06] font-extrabold";
+        caption.textContent = "⚡ ALL CIRCUITS ONLINE — UPGRADE READY. PRESS THE CORE.";
         shockwave.classList.remove('hidden');
-        hideCelebrationModal();
+        shockwave.className = "absolute inset-0 rounded-full bg-[#00ff66]/30";
       } else {
         btn.disabled = true;
-        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-foreground transition-all duration-200 cursor-not-allowed bg-btn-red/25";
-        btn.style.boxShadow = "0 8px 0 0 color-mix(in oklab, var(--color-btn-red-dark) 35%, transparent)";
-        label.textContent = "PRESS";
-        label.className = "font-display text-center text-lg leading-tight tracking-widest text-foreground/40";
-        caption.textContent = `button stays cold until every root drinks reishi (${count}/${target})`;
+        btn.className = "group relative grid h-40 w-40 place-items-center rounded-full border-4 border-[#00ff66]/40 transition-all duration-200 cursor-not-allowed bg-[#00ff66]/15";
+        btn.style.boxShadow = "0 8px 0 0 rgba(0, 77, 26, 0.4)";
+        label.textContent = "UPGRADE";
+        label.className = "font-display text-center text-lg leading-tight tracking-widest text-[#00ff66]/50";
+        caption.textContent = `system unupgraded until all 24 circuits connect (${count}/${target})`;
         shockwave.classList.add('hidden');
-        hideCelebrationModal();
       }
 
       // Update Ticker
@@ -487,12 +780,19 @@
       };
 
       evt.addEventListener('init', e => updateStateUI(JSON.parse(e.data).state));
-      evt.addEventListener('scan', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('scan', e => {
+        const data = JSON.parse(e.data);
+        updateStateUI(data.state);
+        if (data.payload && data.payload.name) showFloatingName(data.payload.name);
+      });
       evt.addEventListener('target', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('pause', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('fire', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('reset', e => updateStateUI(JSON.parse(e.data).state));
       evt.addEventListener('delete', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('lock', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('brochure', e => updateStateUI(JSON.parse(e.data).state));
+      evt.addEventListener('marquee', e => updateStateUI(JSON.parse(e.data).state));
 
       evt.onerror = () => {
         ind.textContent = '○ Reconnecting...';
@@ -504,7 +804,7 @@
 
     // Inauguration Button Trigger
     document.getElementById('inauguration-btn').addEventListener('click', async () => {
-      if (state.attendees.length >= state.target && !state.fired && !state.paused) {
+      if (state.attendees.length >= state.target && !state.fired && !state.paused && !state.buttonLocked) {
         await fetch('/api/fire', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -513,85 +813,8 @@
       }
     });
 
-    // High Performance 60FPS Confetti Canvas Engine
-    let confettiAnimationId = null;
-    function startConfetti() {
-      const canvas = document.getElementById('confetti-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
-      const colors = ["#FE7B02", "#FE3F21", "#F858BC", "#575ECF", "#06D6A0", "#FFD166", "#118AB2"];
-      const particles = [];
-      for (let i = 0; i < 110; i++) {
-        particles.push({
-          x: canvas.width * 0.5 + (Math.random() - 0.5) * 200,
-          y: canvas.height * 0.5 + (Math.random() - 0.5) * 100,
-          vx: (Math.random() - 0.5) * 20,
-          vy: -Math.random() * 18 - 6,
-          size: Math.random() * 9 + 5,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          rotation: Math.random() * 360,
-          rSpeed: (Math.random() - 0.5) * 12,
-          gravity: 0.35,
-          drag: 0.985
-        });
-      }
-
-      function loop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i < particles.length; i++) {
-          const p = particles[i];
-          p.vx *= p.drag;
-          p.vy += p.gravity;
-          p.x += p.vx;
-          p.y += p.vy;
-          p.rotation += p.rSpeed;
-
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate((p.rotation * Math.PI) / 180);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
-          ctx.restore();
-
-          if (p.y > canvas.height + 20) {
-            p.y = -20;
-            p.x = Math.random() * canvas.width;
-            p.vy = Math.random() * 3 + 2;
-            p.vx = (Math.random() - 0.5) * 2;
-          }
-        }
-        confettiAnimationId = requestAnimationFrame(loop);
-      }
-      loop();
-    }
-
-    function stopConfetti() {
-      if (confettiAnimationId) {
-        cancelAnimationFrame(confettiAnimationId);
-        confettiAnimationId = null;
-      }
-    }
-
-    function showCelebrationModal(count) {
-      const modal = document.getElementById('celebration-modal');
-      document.getElementById('modal-maker-count').textContent = count;
-      modal.classList.remove('hidden');
-      if (!confettiAnimationId) startConfetti();
-    }
-
-    function hideCelebrationModal() {
-      const modal = document.getElementById('celebration-modal');
-      modal.classList.add('hidden');
-      stopConfetti();
-    }
-
-    document.getElementById('modal-close-btn').addEventListener('click', async () => {
-      hideCelebrationModal();
-      await fetch('/api/reset', { method: 'POST' });
-    });
+    // Celebration moved to its own page (celebration.html) — shown on fire, no modal here.
+    // Reset now happens from the admin panel only.
 
     // Keyboard trigger (SPACE or S)
     window.addEventListener('keydown', async (e) => {
@@ -602,6 +825,51 @@
           await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
         }
       }
+    });
+
+    // ----- Secret Admin Gate: click the footer heart 5 times -----
+    let heartClicks = 0;
+    let heartTimer = null;
+
+    document.getElementById('secret-heart').addEventListener('click', () => {
+      heartClicks++;
+      clearTimeout(heartTimer);
+      heartTimer = setTimeout(() => { heartClicks = 0; }, 2500);
+      if (heartClicks >= 5) {
+        heartClicks = 0;
+        const overlay = document.getElementById('secret-admin-overlay');
+        overlay.classList.remove('hidden');
+        overlay.classList.add('grid');
+        document.getElementById('admin-password-input').value = '';
+        document.getElementById('admin-gate-error').classList.add('hidden');
+        setTimeout(() => document.getElementById('admin-password-input').focus(), 50);
+      }
+    });
+
+    function closeAdminGate() {
+      const overlay = document.getElementById('secret-admin-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('grid');
+    }
+
+    function tryAdminEnter() {
+      const val = document.getElementById('admin-password-input').value;
+      if (val === 'hello') {
+        closeAdminGate();
+        window.open('admin.html', '_blank');
+      } else {
+        const err = document.getElementById('admin-gate-error');
+        err.classList.remove('hidden');
+        document.getElementById('admin-password-input').value = '';
+        document.getElementById('admin-password-input').focus();
+      }
+    }
+
+    document.getElementById('admin-gate-enter').addEventListener('click', tryAdminEnter);
+    document.getElementById('admin-gate-cancel').addEventListener('click', closeAdminGate);
+    document.getElementById('admin-password-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') tryAdminEnter();
+      if (e.key === 'Escape') closeAdminGate();
     });
 
     // Start

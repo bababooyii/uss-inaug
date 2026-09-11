@@ -7,6 +7,12 @@
   <link rel="stylesheet" href="assets/styles-Cc3jfXhB.css">
   <link rel="stylesheet" href="_external/fonts.googleapis.com/css2.family_Fredoka_wght_500_600_700_family_Patrick_Hand_display_swap.css">
   <style>
+    :root {
+      --reishi: #00ff66;
+      --color-reishi: #00ff66;
+      --reishi-deep: #003814;
+      --color-reishi-deep: #003814;
+    }
     body {
       background-color: var(--background, #FAF9F6);
       color: var(--foreground, #1B1B1B);
@@ -70,8 +76,8 @@
     <!-- Main Registration Panel -->
     <div id="form-panel" class="panel p-6 space-y-5">
       <div class="space-y-1">
-        <h2 class="font-display text-xl">Register & Charge a Root</h2>
-        <p class="font-hand text-sm text-muted-foreground">Enter your name to light up the main stage reishi console!</p>
+        <h2 class="font-display text-xl">Register & Energize a Circuit</h2>
+        <p class="font-hand text-sm text-muted-foreground">Enter your name to energize the main stage Upgrade console!</p>
       </div>
 
       <form id="checkin-form" onsubmit="submitCheckin(event)" class="space-y-4">
@@ -85,8 +91,8 @@
           <input id="maker-team" type="text" placeholder="e.g. Byte Bandits" class="w-full rounded-xl border-2 border-foreground bg-card p-3.5 font-hand text-base text-foreground outline-none focus:ring-2 focus:ring-tetris-cyan">
         </div>
 
-        <button id="btn-submit" type="submit" class="btn-ink w-full flex items-center justify-center gap-2 text-lg bg-reishi text-foreground border-foreground mt-2">
-          🚀 Light the Stage Root!
+        <button id="btn-submit" type="submit" class="btn-ink w-full flex items-center justify-center gap-2 text-lg bg-reishi text-foreground border-foreground mt-2 shadow-[0_0_15px_rgba(0,255,102,0.4)]">
+          ⚡ Energize the Circuit!
         </button>
       </form>
     </div>
@@ -98,7 +104,7 @@
       </div>
       <h2 class="font-display text-2xl text-foreground">You're Checked In!</h2>
       <p class="font-hand text-lg text-muted-foreground">
-        Welcome <strong id="success-name" class="text-foreground"></strong>! Look at the big screen — your root is glowing! ✨
+        Welcome <strong id="success-name" class="text-foreground"></strong>! Look at the big screen — your circuit is online! 💚
       </p>
     </div>
 

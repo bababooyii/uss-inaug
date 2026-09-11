@@ -7,6 +7,12 @@
   <link rel="stylesheet" href="assets/styles-Cc3jfXhB.css">
   <link rel="stylesheet" href="_external/fonts.googleapis.com/css2.family_Fredoka_wght_500_600_700_family_Patrick_Hand_display_swap.css">
   <style>
+    :root {
+      --reishi: #00ff66;
+      --color-reishi: #00ff66;
+      --reishi-deep: #003814;
+      --color-reishi-deep: #003814;
+    }
     body {
       background-color: var(--background, #FAF9F6);
       color: var(--foreground, #1B1B1B);
@@ -70,8 +76,8 @@
     <!-- Main Registration Panel -->
     <div id="form-panel" class="panel p-6 space-y-5">
       <div class="space-y-1">
-        <h2 class="font-display text-xl">Register & Charge a Root</h2>
-        <p class="font-hand text-sm text-muted-foreground">Enter your name to light up the main stage reishi console!</p>
+        <h2 class="font-display text-xl">Register & Energize a Circuit</h2>
+        <p class="font-hand text-sm text-muted-foreground">Enter your name to energize the main stage Upgrade console!</p>
       </div>
 
       <form id="checkin-form" onsubmit="submitCheckin(event)" class="space-y-4">
@@ -81,12 +87,12 @@
         </div>
 
         <div>
-          <label class="font-display text-xs uppercase tracking-wider text-muted-foreground block mb-1.5">Ticket ID (optional)</label>
-          <input id="maker-ticket" type="text" placeholder="e.g. THUB-3210" class="w-full rounded-xl border-2 border-foreground bg-card p-3.5 font-mono text-sm text-foreground outline-none focus:ring-2 focus:ring-tetris-cyan">
+          <label class="font-display text-xs uppercase tracking-wider text-muted-foreground block mb-1.5">Team Name</label>
+          <input id="maker-team" type="text" placeholder="e.g. Byte Bandits" class="w-full rounded-xl border-2 border-foreground bg-card p-3.5 font-hand text-base text-foreground outline-none focus:ring-2 focus:ring-tetris-cyan">
         </div>
 
-        <button id="btn-submit" type="submit" class="btn-ink w-full flex items-center justify-center gap-2 text-lg bg-reishi text-foreground border-foreground mt-2">
-          🚀 Light the Stage Root!
+        <button id="btn-submit" type="submit" class="btn-ink w-full flex items-center justify-center gap-2 text-lg bg-reishi text-foreground border-foreground mt-2 shadow-[0_0_15px_rgba(0,255,102,0.4)]">
+          ⚡ Energize the Circuit!
         </button>
       </form>
     </div>
@@ -98,11 +104,8 @@
       </div>
       <h2 class="font-display text-2xl text-foreground">You're Checked In!</h2>
       <p class="font-hand text-lg text-muted-foreground">
-        Welcome <strong id="success-name" class="text-foreground"></strong>! Look at the big screen — your root is glowing! ✨
+        Welcome <strong id="success-name" class="text-foreground"></strong>! Look at the big screen — your circuit is online! 💚
       </p>
-      <button onclick="resetForm()" class="btn-ink text-sm py-2 px-6">
-        Register Another Maker
-      </button>
     </div>
 
     <!-- Live Stage Counter Widget -->
@@ -111,18 +114,12 @@
         <p class="font-hand text-xs text-muted-foreground">Total Makers In</p>
         <span id="counter-num" class="font-display text-2xl">0 / 32</span>
       </div>
-      <a href="/" class="font-hand text-xs text-muted-foreground underline hover:text-foreground">
-        View Big Screen ↗
-      </a>
     </div>
   </div>
 
   <script>
-    // Autofill ticket parameter if present
+    // Autofill name parameter if present
     const params = new URLSearchParams(window.location.search);
-    if (params.get('ticket')) {
-      document.getElementById('maker-ticket').value = params.get('ticket');
-    }
     if (params.get('name')) {
       document.getElementById('maker-name').value = params.get('name');
     }
@@ -161,7 +158,7 @@
       e.preventDefault();
       const btn = document.getElementById('btn-submit');
       const name = document.getElementById('maker-name').value.trim();
-      const ticket = document.getElementById('maker-ticket').value.trim();
+      const team = document.getElementById('maker-team').value.trim();
 
       btn.disabled = true;
       btn.textContent = 'Registering...';
@@ -170,7 +167,7 @@
         const res = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name || undefined, ticket: ticket || undefined })
+          body: JSON.stringify({ name: name || undefined, ticket: team || undefined })
         });
         const data = await res.json();
 
@@ -188,13 +185,6 @@
         btn.disabled = false;
         btn.textContent = '🚀 Light the Stage Root!';
       }
-    }
-
-    function resetForm() {
-      document.getElementById('maker-name').value = '';
-      document.getElementById('maker-ticket').value = '';
-      document.getElementById('success-panel').classList.add('hidden');
-      document.getElementById('form-panel').classList.remove('hidden');
     }
 
     initSSE();

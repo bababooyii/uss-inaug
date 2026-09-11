@@ -66,31 +66,38 @@ class StateManager:
         except Exception:
             return "127.0.0.1"
 
+    def _snapshot(self):
+        """Build the state dict. Caller MUST already hold self.lock.
+        (threading.Lock is not reentrant, so a locked get_state() called from
+        inside another locked method deadlocks the request thread — that is
+        why /api/scan used to hang forever on "Registering...".)"""
+        count = len(self.attendees)
+        roots_lit = min(24, round(count / self.target * 24)) if self.target > 0 else 0
+        armed = count >= self.target
+        return {
+            "target": self.target,
+            "paused": self.paused,
+            "fired": self.fired,
+            "attendees": list(self.attendees),
+            "count": count,
+            "rootsLit": roots_lit,
+            "armed": armed,
+            "publicUrl": self.public_url,
+            "buttonLocked": self.button_locked,
+            "customQr": self.custom_qr is not None,
+            "brochure": {
+                "count": len(self.brochure),
+                "names": [b["name"] for b in self.brochure],
+            },
+            "marqueeTop": self.marquee_top,
+            "marqueeBottom": self.marquee_bottom,
+            "localIp": self.local_ip,
+            "port": PORT
+        }
+
     def get_state(self):
         with self.lock:
-            count = len(self.attendees)
-            roots_lit = min(24, round(count / self.target * 24)) if self.target > 0 else 0
-            armed = count >= self.target
-            return {
-                "target": self.target,
-                "paused": self.paused,
-                "fired": self.fired,
-                "attendees": list(self.attendees),
-                "count": count,
-                "rootsLit": roots_lit,
-                "armed": armed,
-                "publicUrl": self.public_url,
-                "buttonLocked": self.button_locked,
-                "customQr": self.custom_qr is not None,
-                "brochure": {
-                    "count": len(self.brochure),
-                    "names": [b["name"] for b in self.brochure],
-                },
-                "marqueeTop": self.marquee_top,
-                "marqueeBottom": self.marquee_bottom,
-                "localIp": self.local_ip,
-                "port": PORT
-            }
+            return self._snapshot()
 
     def add_client(self, client_queue):
         with self.lock:
@@ -112,12 +119,13 @@ class StateManager:
 
     def scan(self, ticket=None, name=None):
         with self.lock:
+            # Use _snapshot() here — get_state() would re-acquire the lock and deadlock.
             if self.paused:
-                return False, "System is currently paused by admin.", self.get_state()
+                return False, "System is currently paused by admin.", self._snapshot()
             if self.fired:
-                return False, "Ceremony has already been fired.", self.get_state()
+                return False, "Ceremony has already been fired.", self._snapshot()
             if len(self.attendees) >= self.target:
-                return False, "Target makers already reached!", self.get_state()
+                return False, "Target makers already reached!", self._snapshot()
 
             idx = len(self.attendees)
             if not name:
@@ -644,10 +652,15 @@ class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
             state_manager.remove_client(client_q)
 
     def send_json(self, status, payload):
+        body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
+        # Content-Length matters behind tunnels/proxies: without it some clients
+        # wait for connection-close before resolving fetch(), leaving the page
+        # stuck on "Registering...".
+        self.send_header("Content-Length", str(len(body)))
         self.end_headers()
-        self.wfile.write(json.dumps(payload).encode("utf-8"))
+        self.wfile.write(body)
 
 class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True

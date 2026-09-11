@@ -773,11 +773,19 @@
 
     async function fireCeremony() {
       if (confirm('Trigger the Inauguration Ceremony on the main screen?')) {
-        await fetch('/api/fire', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fired: true })
-        });
+        try {
+          const res = await fetch('/api/fire', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fired: true })
+          });
+          const data = await res.json();
+          if (!data.success) {
+            alert('Failed: ' + (data.message || 'Unknown error'));
+          }
+        } catch (err) {
+          alert('Error: ' + err.message);
+        }
       }
     }
 
